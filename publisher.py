@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 import json
 import paho.mqtt.client as mqtt
 
-unwind_commands = ["start_unwind", "stop_unwind", "pickup", "dock"]
+unwind_commands = ["set_alarm", "start_unwind", "stop_unwind", "pickup", "dock"]
 
 timer_start = None
 is_timer_running = False
@@ -91,7 +91,7 @@ async def run_countdown(alarm_time_str: str):
             delta = alarm_dt - now
             hours, minutes = divmod(int(delta.total_seconds() / 60), 60)
             print(f"  [SLEEP COUNTDOWN] {hours}h {minutes}m available  (alarm: {alarm_time_str})")
-            await asyncio.sleep(10)
+            await asyncio.sleep(5)
     except asyncio.CancelledError:
         pass  # cancelled cleanly on stop_unwind
 
@@ -117,9 +117,21 @@ async def handle_timer(reader, writer):
     command_arg = parts[1] if len(parts) > 1 else None
 
     if input_command not in unwind_commands:
-        print("Invalid command. Please enter 'start_unwind HH:MM', 'stop_unwind', 'pickup', or 'dock'. Try again.")
+        print("Invalid command. Please enter 'set_alarm HH:MM', 'start_unwind', 'stop_unwind', 'pickup', or 'dock'. Try again.")
 
-    if input_command == "start_unwind":
+    if input_command == "set_alarm":
+        if command_arg is None:
+            print("[DEVICE] Usage: set_alarm HH:MM  (e.g. set_alarm 07:30)")
+        else:
+            alarm_time = command_arg
+            print(f"[DEVICE] Alarm set for {alarm_time}")
+            if is_timer_running:
+                # Session already active — restart countdown with updated alarm
+                if countdown_task and not countdown_task.done():
+                    countdown_task.cancel()
+                countdown_task = asyncio.create_task(run_countdown(alarm_time))
+
+    elif input_command == "start_unwind":
         if not is_timer_running:
             timer_start = time.time()
             is_timer_running = True
@@ -128,7 +140,6 @@ async def handle_timer(reader, writer):
             total_paused = 0.0
             is_phone_docked = True
             experience_state = "PLAYING"
-            alarm_time = command_arg  # e.g. "07:30"
             pickup_count = 0
             print_state_banner("PLAYING", format_time(timer_start))
             if alarm_time:

@@ -39,3 +39,6 @@ python3 device.py
 
 ### Start subscriber
 python3 subscriber.py
+
+### View visualization
+python3 subscriber.py
