@@ -3,13 +3,15 @@ import paho.mqtt.client as mqtt
 import time
 from llm import get_llm_response, get_llm_client
 import sqlite3
-from datetime import datetime
 import json
 
 START_TOPIC = "device/events/unwind_start"
 STOP_TOPIC = "device/events/unwind_stop"
+PICKUP_TOPIC = "device/events/phone_pickup"
+DOCK_TOPIC = "device/events/phone_dock"
 DATABASE_FILE="user_device_data.db"
 DEVICE_ID = "device1"
+
 
 def init_db(conn):
     c = conn.cursor()
@@ -22,10 +24,24 @@ def init_db(conn):
             session_started_at TEXT,
             is_phone_down BOOLEAN,
             status TEXT,
-            created_at TEXT
+            created_at TEXT,
+            pickup_count INTEGER DEFAULT 0,
+            alarm_time TEXT,
+            duration_seconds REAL
         )
     """)
     conn.commit()
+    # Migrate existing tables that predate these columns
+    for alter_sql in [
+        "ALTER TABLE sessions ADD COLUMN pickup_count INTEGER DEFAULT 0",
+        "ALTER TABLE sessions ADD COLUMN alarm_time TEXT",
+        "ALTER TABLE sessions ADD COLUMN duration_seconds REAL",
+    ]:
+        try:
+            c.execute(alter_sql)
+            conn.commit()
+        except sqlite3.OperationalError:
+            pass  # column already exists
 
 
 def insert_session_data(conn, msg_payload):
@@ -39,15 +55,21 @@ def insert_session_data(conn, msg_payload):
     user_id = data.get("device_id")
     event_type = data.get("command")
     session_started_at = data.get("start_time")
-    is_phone_down = True # because we always put phone down to start session
+    is_phone_down = True
     status = "completed"
-    created_at = data.get("date")  # use message-provided date
+    created_at = data.get("date")
+    pickup_count = data.get("pickup_count", 0)
+    alarm_time = data.get("alarm_time")
+    duration_seconds = data.get("duration")
 
     c = conn.cursor()
     c.execute("""
-        INSERT INTO sessions (message_id, user_id, event_type, session_started_at, is_phone_down, status, created_at)
-        VALUES (?, ?, ?, ?, ?, ?, ?)
-    """, (message_id, user_id, event_type, session_started_at, is_phone_down, status, created_at))
+        INSERT INTO sessions
+            (message_id, user_id, event_type, session_started_at, is_phone_down,
+             status, created_at, pickup_count, alarm_time, duration_seconds)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    """, (message_id, user_id, event_type, session_started_at, is_phone_down,
+          status, created_at, pickup_count, alarm_time, duration_seconds))
     conn.commit()
     print(f"Inserted session from message_id {message_id}")
 
@@ -70,36 +92,46 @@ def on_connect(client, userdata, flags, rc):
     print(f"Connecting to broker with return code {rc}")
     if rc == 0:
         print("Successfully connected to broker")
-        # Subscribe to topics
         client.subscribe(START_TOPIC)
         client.subscribe(STOP_TOPIC)
+        client.subscribe(PICKUP_TOPIC)
+        client.subscribe(DOCK_TOPIC)
     else:
         print(f"Connection failed with code {rc}")
 
 def on_message(client, userdata, msg):
-    print(f"Received message on topic {msg.topic}: {msg.payload.decode()}")
-
     conn = userdata["conn"]
+    payload_str = msg.payload.decode()
+
+    try:
+        data = json.loads(payload_str)
+    except json.JSONDecodeError:
+        print(f"[SUBSCRIBER] Could not parse payload: {payload_str}")
+        return
 
     if msg.topic == START_TOPIC:
-        print(f"Session started at {msg.payload.decode()}")
-        start_prompt = f"New unwind session started with data: {msg.payload.decode()}"
-        print(f"LLM Prompt for session start: {start_prompt}")
-        llm_client = get_llm_client()
-        llm_response = get_llm_response(llm_client, start_prompt)
-        print(f"LLM Response to session start: {llm_response}")
+        print(f"[SUBSCRIBER] Session started at {data.get('start_time')}")
+
+    elif msg.topic == PICKUP_TOPIC:
+        print(f"[SUBSCRIBER] Phone pickup #{data.get('pickup_count')} recorded")
+
+    elif msg.topic == DOCK_TOPIC:
+        print(f"[SUBSCRIBER] Phone docked")
 
     elif msg.topic == STOP_TOPIC:
-        # LLM Client Create
-        # Insert directly from message payload
         insert_session_data(conn, msg.payload)
-        # Query last 3 sessions for LLM
         last_sessions = query_last_sessions(conn, 3)
-        prompt = f"Analyze the following session data for patterns: {last_sessions}"
-        print(prompt)
+        duration_min = round(data.get("duration", 0) / 60, 1)
+        prompt = (
+            f"Tonight's session: started at {data.get('start_time')}, "
+            f"duration {duration_min} minutes, "
+            f"phone pickups {data.get('pickup_count', 0)}, "
+            f"alarm set for {data.get('alarm_time', 'not set')}.\n\n"
+            f"Recent session history (newest first): {last_sessions}"
+        )
         llm_client = get_llm_client()
         patterns = get_llm_response(llm_client, prompt)
-        print(f"LLM Identified Patterns: {patterns}")
+        print(f"\n  [UNWIND INSIGHTS]\n{patterns}\n")
 
 
 if __name__ == "__main__":

@@ -1,6 +1,7 @@
 import asyncio
+from datetime import datetime
 
-unwind_commands = ["start_unwind", "stop_unwind", "exit"]
+base_commands = ["start_unwind", "stop_unwind", "pickup", "dock", "exit"]
 
 
 async def send_command(command):
@@ -10,21 +11,40 @@ async def send_command(command):
     writer.close()
     await writer.wait_closed()
 
+
+def validate_input(raw: str):
+    """
+    Validate and normalize a device command.
+    Returns the command string to send, or None if invalid (and prints the error).
+    """
+    parts = raw.strip().split(None, 1)
+    if not parts:
+        return None
+
+    base = parts[0].lower()
+
+    if base not in base_commands:
+        print(f"Invalid command '{base}'. Valid commands: {', '.join(base_commands)}")
+        return None
+
+    return base
+
+
 async def main():
+    print("Unwind device interface")
+    print("Commands: start_unwind | stop_unwind | pickup | dock | exit")
     try:
         while True:
-            input_command = input("Enter command (start_unwind/stop_unwind/exit): ")
-
-            if input_command not in unwind_commands:
-                print("Invalid command. Please enter 'start_unwind', 'stop_unwind', or 'exit'. Try again.")
-
-            input_command = input_command.strip().lower()
-            await send_command(input_command)
-            if input_command == "exit":
+            raw = input("\n> ")
+            command = validate_input(raw)
+            if command is None:
+                continue
+            await send_command(command)
+            if command == "exit":
                 break
     except KeyboardInterrupt:
-        print("KeyboardInterrupt detected. Exiting commands inferface!")
+        print("KeyboardInterrupt detected. Exiting commands interface!")
         asyncio.get_running_loop().stop()
-    
+
 
 asyncio.run(main())
