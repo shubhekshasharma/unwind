@@ -41,4 +41,4 @@ python3 device.py
 python3 subscriber.py
 
 ### View visualization
-python3 subscriber.py
+python3 visualization.py
