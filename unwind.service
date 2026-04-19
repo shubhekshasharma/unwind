@@ -1,0 +1,17 @@
+[Unit]
+Description=Unwind Bedside Device
+After=network.target graphical-session.target
+Wants=graphical-session.target
+
+[Service]
+Type=simple
+User=pi
+WorkingDirectory=/home/pi/unwind
+ExecStart=/home/pi/unwind/start.sh
+Restart=on-failure
+RestartSec=5
+Environment=DISPLAY=:0
+Environment=XAUTHORITY=/home/pi/.Xauthority
+
+[Install]
+WantedBy=graphical-session.target

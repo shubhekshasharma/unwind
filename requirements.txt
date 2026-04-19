@@ -1,18 +1,13 @@
-blinker==1.9.0
-matplotlib>=3.9.0
-click==8.1.8
-Flask==3.1.0
-importlib_metadata==8.6.1
-itsdangerous==2.2.0
-Jinja2==3.1.5
-MarkupSafe==3.0.2
+aiofiles==24.1.0
+fastapi==0.115.0
+uvicorn[standard]==0.32.0
+websockets==13.1
+
 paho-mqtt==2.1.0
 python-osc==1.8.3
-Werkzeug==3.1.3
-zipp==3.21.0
+
+# Optional: LLM features
 openai==2.15.0
 
-# Touch UI
-kivy==2.3.0
-# On Raspberry Pi, install kivy via:
-#   pip install kivy[base] kivy_examples  (or use apt: sudo apt install python3-kivy)
+# Optional: legacy Kivy UI (no longer the primary interface)
+# kivy==2.3.0
