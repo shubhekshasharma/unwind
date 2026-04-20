@@ -62,45 +62,50 @@ export function HomeScreen({ prefs, sendCmd }: Props) {
         className="absolute inset-0"
         animate={{
           background: [
-            'radial-gradient(circle at 50% 30%, rgba(251,146,60,0.1) 0%, transparent 60%)',
-            'radial-gradient(circle at 50% 35%, rgba(245,158,11,0.13) 0%, transparent 60%)',
-            'radial-gradient(circle at 50% 30%, rgba(251,146,60,0.1) 0%, transparent 60%)',
+            'radial-gradient(circle at 50% 30%, rgba(251,146,60,0.07) 0%, transparent 60%)',
+            'radial-gradient(circle at 50% 35%, rgba(245,158,11,0.09) 0%, transparent 60%)',
+            'radial-gradient(circle at 50% 30%, rgba(251,146,60,0.07) 0%, transparent 60%)',
           ],
         }}
         transition={{ duration: 10, repeat: Infinity }}
       />
 
-      <div className="relative size-full flex flex-col p-7">
+      <div className="relative size-full flex flex-col p-5">
         {/* Header */}
-        <div className="flex items-center justify-between mb-10">
+        <div className="flex items-center justify-between mb-5">
           <div className="flex items-center gap-3">
-            <UnwindLogo size={26} animate />
-            <span className="text-base text-orange-300/90 tracking-wide" style={{ fontWeight: 350 }}>Unwind</span>
+            <UnwindLogo size={36} animate />
+            <span className="text-base leading-none text-orange-300/90 tracking-wide" style={{ fontWeight: 500 }}>Unwind</span>
           </div>
           <button
             onClick={openSettings}
             className="p-2.5 rounded-full hover:bg-orange-900/20 transition-colors"
           >
-            <SettingsIcon className="w-5 h-5 text-orange-400/70" />
+            <SettingsIcon className="w-6 h-6 text-orange-400/75" />
           </button>
         </div>
 
         {/* Clock */}
-        <div className="flex-1 flex flex-col items-center justify-center -mt-6">
-          <div className="relative mb-8">
-            <svg className="w-52 h-52 -rotate-90 absolute inset-0" style={{ filter: 'blur(0.5px)' }}>
-              <circle cx="104" cy="104" r="100" stroke="rgba(251,146,60,0.06)" strokeWidth="2" fill="none" />
+        <div className="flex-1 flex flex-col items-center justify-center -mt-2">
+          {/* Container sized to the ring so text stays inside it */}
+          <div className="relative w-64 h-64 mx-auto mb-5 flex items-center justify-center">
+            <svg
+              viewBox="0 0 208 208"
+              className="absolute inset-0 w-full h-full -rotate-90"
+              style={{ filter: 'blur(0.3px)' }}
+            >
+              <circle cx="104" cy="104" r="100" stroke="rgba(251,146,60,0.10)" strokeWidth="2.5" fill="none" />
               <motion.circle
                 cx="104" cy="104" r="100"
-                stroke="url(#tg)" strokeWidth="2" fill="none"
+                stroke="url(#tg)" strokeWidth="2.5" fill="none"
                 strokeDasharray={628}
                 strokeDashoffset={628 - dayProgress}
                 strokeLinecap="round"
               />
               <defs>
                 <linearGradient id="tg" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stopColor="rgba(251,146,60,0.35)" />
-                  <stop offset="100%" stopColor="rgba(245,158,11,0.55)" />
+                  <stop offset="0%" stopColor="rgba(251,146,60,0.50)" />
+                  <stop offset="100%" stopColor="rgba(245,158,11,0.70)" />
                 </linearGradient>
               </defs>
             </svg>
@@ -108,15 +113,15 @@ export function HomeScreen({ prefs, sendCmd }: Props) {
             <motion.div
               animate={{ opacity: [0.95, 1, 0.95] }}
               transition={{ duration: 3, repeat: Infinity }}
-              className="text-center relative"
+              className="text-center relative z-10"
             >
               <div
-                className="text-[4.8rem] leading-none text-white tracking-tight tabular-nums"
-                style={{ fontWeight: 250 }}
+                className="text-5xl leading-none text-white tracking-tight tabular-nums"
+                style={{ fontWeight: 300 }}
               >
                 {timeStr}
               </div>
-              <div className="text-sm text-orange-300/45 mt-4 tracking-wide" style={{ fontWeight: 400 }}>
+              <div className="text-sm text-orange-300/65 mt-3 tracking-wide" style={{ fontWeight: 400 }}>
                 {now.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
               </div>
             </motion.div>
@@ -125,36 +130,36 @@ export function HomeScreen({ prefs, sendCmd }: Props) {
 
         {/* Schedule cards */}
         <div className="space-y-3">
-          <div className="flex items-baseline justify-between px-1">
-            <span className="text-xs tracking-widest uppercase text-orange-400/50" style={{ fontWeight: 500 }}>
+          <div className="flex items-center justify-between px-1">
+            <span className="text-sm tracking-widest uppercase text-orange-400/65" style={{ fontWeight: 600 }}>
               Schedule
             </span>
             <button
               onClick={openSettings}
-              className="flex items-center gap-1.5 text-xs text-orange-400/60 hover:text-orange-300 transition-colors"
+              className="flex items-center gap-1.5 text-sm text-orange-400/70 hover:text-orange-300 transition-colors px-2 py-1"
             >
-              <Edit3 className="w-3 h-3" /> Edit
+              <Edit3 className="w-4 h-4" /> Edit
             </button>
           </div>
 
-          <div className="grid grid-cols-3 gap-2">
-            <div className="bg-gradient-to-br from-orange-950/30 to-orange-900/20 border border-orange-800/20 rounded-2xl p-4 backdrop-blur-sm">
-              <div className="text-[10px] tracking-wider uppercase text-orange-400/50 mb-2" style={{ fontWeight: 500 }}>Bedtime</div>
-              <div className="text-xl text-orange-100" style={{ fontWeight: 400 }}>{fmt12h(prefs.bedtime)}</div>
+          <div className="grid grid-cols-3 gap-2.5">
+            <div className="bg-gradient-to-br from-orange-950/30 to-orange-900/20 border border-orange-800/25 rounded-xl p-4 backdrop-blur-sm">
+              <div className="text-xs tracking-wider uppercase text-orange-400/70 mb-2" style={{ fontWeight: 600 }}>Bedtime</div>
+              <div className="text-lg text-orange-100 tabular-nums" style={{ fontWeight: 500 }}>{fmt12h(prefs.bedtime)}</div>
             </div>
-            <div className="bg-gradient-to-br from-amber-950/30 to-amber-900/20 border border-amber-800/20 rounded-2xl p-4 backdrop-blur-sm">
-              <div className="text-[10px] tracking-wider uppercase text-amber-400/50 mb-2" style={{ fontWeight: 500 }}>Wake</div>
-              <div className="text-xl text-amber-100" style={{ fontWeight: 400 }}>{fmt12h(prefs.wakeTime)}</div>
+            <div className="bg-gradient-to-br from-amber-950/30 to-amber-900/20 border border-amber-800/25 rounded-xl p-4 backdrop-blur-sm">
+              <div className="text-xs tracking-wider uppercase text-amber-400/70 mb-2" style={{ fontWeight: 600 }}>Wake</div>
+              <div className="text-lg text-amber-100 tabular-nums" style={{ fontWeight: 500 }}>{fmt12h(prefs.wakeTime)}</div>
             </div>
-            <div className="bg-gradient-to-br from-rose-950/30 to-rose-900/20 border border-rose-800/20 rounded-2xl p-4 backdrop-blur-sm">
-              <div className="text-[10px] tracking-wider uppercase text-rose-400/50 mb-2" style={{ fontWeight: 500 }}>Ritual</div>
-              <div className="text-xl text-rose-100" style={{ fontWeight: 400 }}>{prefs.unwindDuration}m</div>
+            <div className="bg-gradient-to-br from-rose-950/30 to-rose-900/20 border border-rose-800/25 rounded-xl p-4 backdrop-blur-sm">
+              <div className="text-xs tracking-wider uppercase text-rose-400/70 mb-2" style={{ fontWeight: 600 }}>Ritual</div>
+              <div className="text-lg text-rose-100" style={{ fontWeight: 500 }}>{prefs.unwindDuration}m</div>
             </div>
           </div>
 
           <button
             onClick={() => sendCmd({ cmd: 'navigate', screen: 'stats' })}
-            className="w-full py-3 rounded-2xl bg-orange-950/20 border border-orange-800/15 text-orange-300/60 hover:text-orange-200 hover:bg-orange-950/30 transition-colors text-sm mt-1"
+            className="w-full py-3 rounded-2xl bg-orange-950/20 border border-orange-800/15 text-orange-300/70 hover:text-orange-200 hover:bg-orange-950/30 transition-colors text-sm mt-1"
             style={{ fontWeight: 400 }}
           >
             View sleep history
@@ -169,7 +174,7 @@ export function HomeScreen({ prefs, sendCmd }: Props) {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="absolute inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center p-5 z-10"
+            className="absolute inset-0 bg-black/75 backdrop-blur-md flex items-center justify-center p-5 z-10"
             onClick={() => setShowSettings(false)}
           >
             <motion.div
@@ -177,34 +182,34 @@ export function HomeScreen({ prefs, sendCmd }: Props) {
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
               onClick={(e) => e.stopPropagation()}
-              className="bg-gradient-to-b from-orange-950/95 to-slate-950/95 rounded-3xl p-7 w-full border border-orange-800/30 backdrop-blur-xl"
+              className="bg-gradient-to-b from-orange-950/60 to-slate-900/98 rounded-2xl p-6 w-full max-w-sm border border-orange-900/40"
             >
-              <h2 className="text-2xl text-white mb-6" style={{ fontWeight: 400 }}>Edit schedule</h2>
-              <div className="space-y-4 mb-6">
-                <div className="space-y-2">
-                  <label className="text-sm text-orange-200/70" style={{ fontWeight: 500 }}>Bedtime</label>
+              <h2 className="text-xl text-white mb-5" style={{ fontWeight: 500 }}>Edit schedule</h2>
+              <div className="space-y-4 mb-5">
+                <div className="space-y-1.5">
+                  <label className="text-sm text-orange-200/85" style={{ fontWeight: 500 }}>Bedtime</label>
                   <input
                     type="time"
                     value={edit.bedtime}
                     onChange={(e) => setEdit({ ...edit, bedtime: e.target.value })}
-                    className="w-full px-4 py-3 rounded-2xl bg-orange-950/40 border border-orange-800/40 text-white focus:outline-none focus:border-orange-600/60 transition-colors"
+                    className="w-full px-4 py-3 rounded-xl bg-orange-950/30 border border-orange-800/45 text-white focus:outline-none focus:border-orange-500/70 transition-colors"
                   />
                 </div>
-                <div className="space-y-2">
-                  <label className="text-sm text-orange-200/70" style={{ fontWeight: 500 }}>Wake time</label>
+                <div className="space-y-1.5">
+                  <label className="text-sm text-orange-200/85" style={{ fontWeight: 500 }}>Wake time</label>
                   <input
                     type="time"
                     value={edit.wakeTime}
                     onChange={(e) => setEdit({ ...edit, wakeTime: e.target.value })}
-                    className="w-full px-4 py-3 rounded-2xl bg-orange-950/40 border border-orange-800/40 text-white focus:outline-none focus:border-orange-600/60 transition-colors"
+                    className="w-full px-4 py-3 rounded-xl bg-orange-950/30 border border-orange-800/45 text-white focus:outline-none focus:border-orange-500/70 transition-colors"
                   />
                 </div>
-                <div className="space-y-2">
-                  <label className="text-sm text-orange-200/70" style={{ fontWeight: 500 }}>Ritual duration</label>
+                <div className="space-y-1.5">
+                  <label className="text-sm text-orange-200/85" style={{ fontWeight: 500 }}>Ritual duration</label>
                   <select
                     value={edit.unwindDuration}
                     onChange={(e) => setEdit({ ...edit, unwindDuration: Number(e.target.value) })}
-                    className="w-full px-4 py-3 rounded-2xl bg-orange-950/40 border border-orange-800/40 text-white focus:outline-none focus:border-orange-600/60 transition-colors"
+                    className="w-full px-4 py-3 rounded-xl bg-orange-950/30 border border-orange-800/45 text-white focus:outline-none focus:border-orange-500/70 transition-colors"
                   >
                     {DURATIONS.map((d) => (
                       <option key={d} value={d}>{d} minutes</option>
@@ -212,29 +217,31 @@ export function HomeScreen({ prefs, sendCmd }: Props) {
                   </select>
                 </div>
               </div>
-              <div className="space-y-3">
+              <div className="space-y-2.5">
                 <button
                   onClick={saveSettings}
-                  className="w-full py-3.5 rounded-2xl bg-orange-600 hover:bg-orange-500 text-white transition-colors"
+                  className="w-full py-3.5 rounded-xl bg-orange-700/80 hover:bg-orange-700 text-orange-50 transition-colors"
                   style={{ fontWeight: 500 }}
                 >
                   Save changes
                 </button>
                 <button
                   onClick={() => setShowSettings(false)}
-                  className="w-full py-2.5 text-orange-300/70 hover:text-orange-200 transition-colors text-sm"
+                  className="w-full py-2.5 text-orange-300/55 hover:text-orange-200/80 transition-colors text-sm"
                   style={{ fontWeight: 400 }}
                 >
                   Cancel
                 </button>
-                <button
-                  onClick={() => { setShowSettings(false); setShowResetConfirm(true) }}
-                  className="w-full py-2.5 flex items-center justify-center gap-1.5 text-red-400/50 hover:text-red-400/80 transition-colors text-xs"
-                  style={{ fontWeight: 400 }}
-                >
-                  <RotateCcw className="w-3 h-3" />
-                  Reset app &amp; clear data
-                </button>
+                <div className="pt-1 border-t border-orange-900/30">
+                  <button
+                    onClick={() => { setShowSettings(false); setShowResetConfirm(true) }}
+                    className="w-full mt-2 py-2 flex items-center justify-center gap-2 text-sm text-red-400/55 hover:text-red-300/80 transition-colors"
+                    style={{ fontWeight: 400 }}
+                  >
+                    <RotateCcw className="w-3 h-3" />
+                    Reset app &amp; clear data
+                  </button>
+                </div>
               </div>
             </motion.div>
           </motion.div>
@@ -248,7 +255,7 @@ export function HomeScreen({ prefs, sendCmd }: Props) {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="absolute inset-0 bg-black/85 backdrop-blur-md flex items-center justify-center p-5 z-20"
+            className="absolute inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center p-5 z-20"
             onClick={() => setShowResetConfirm(false)}
           >
             <motion.div
@@ -256,23 +263,23 @@ export function HomeScreen({ prefs, sendCmd }: Props) {
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
               onClick={(e) => e.stopPropagation()}
-              className="bg-gradient-to-b from-red-950/95 to-slate-950/95 rounded-3xl p-7 w-full border border-red-800/30 backdrop-blur-xl"
+              className="bg-gradient-to-b from-red-950/60 to-slate-900/98 rounded-2xl p-6 w-full max-w-sm border border-red-900/40"
             >
-              <h2 className="text-xl text-white mb-2" style={{ fontWeight: 400 }}>Reset everything?</h2>
-              <p className="text-red-200/60 text-sm mb-6" style={{ fontWeight: 350 }}>
+              <h2 className="text-xl text-white mb-2" style={{ fontWeight: 500 }}>Reset everything?</h2>
+              <p className="text-red-200/80 text-sm mb-6" style={{ fontWeight: 400 }}>
                 This will erase all session history, clear your schedule, and restart onboarding. This cannot be undone.
               </p>
-              <div className="space-y-3">
+              <div className="space-y-2.5">
                 <button
                   onClick={() => { sendCmd({ cmd: 'reset' }); setShowResetConfirm(false) }}
-                  className="w-full py-3.5 rounded-2xl bg-red-700 hover:bg-red-600 text-white transition-colors"
+                  className="w-full py-3.5 rounded-xl bg-red-700 hover:bg-red-600 text-white transition-colors"
                   style={{ fontWeight: 500 }}
                 >
                   Yes, reset everything
                 </button>
                 <button
                   onClick={() => setShowResetConfirm(false)}
-                  className="w-full py-2.5 text-orange-300/70 hover:text-orange-200 transition-colors text-sm"
+                  className="w-full py-2.5 text-orange-300/55 hover:text-orange-200/80 transition-colors text-sm"
                   style={{ fontWeight: 400 }}
                 >
                   Cancel

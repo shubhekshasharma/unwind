@@ -45,16 +45,16 @@ export function ActiveSessionScreen({ prefs, session, sendCmd }: Props) {
 
   return (
     <div className="size-full relative overflow-hidden">
-      <div className="absolute inset-0 bg-gradient-to-b from-orange-950 via-amber-950 to-slate-950" />
+      <div className="absolute inset-0 bg-gradient-to-b from-slate-950 via-orange-950/25 to-slate-950" />
 
       {/* Ambient glow */}
       <motion.div
         className="absolute inset-0"
         animate={{
           background: [
-            'radial-gradient(circle at 30% 40%, rgba(251,146,60,0.22) 0%, transparent 50%), radial-gradient(circle at 70% 60%, rgba(245,158,11,0.18) 0%, transparent 50%)',
-            'radial-gradient(circle at 70% 60%, rgba(251,146,60,0.22) 0%, transparent 50%), radial-gradient(circle at 30% 40%, rgba(245,158,11,0.18) 0%, transparent 50%)',
-            'radial-gradient(circle at 30% 40%, rgba(251,146,60,0.22) 0%, transparent 50%), radial-gradient(circle at 70% 60%, rgba(245,158,11,0.18) 0%, transparent 50%)',
+            'radial-gradient(circle at 30% 40%, rgba(251,146,60,0.13) 0%, transparent 50%), radial-gradient(circle at 70% 60%, rgba(245,158,11,0.10) 0%, transparent 50%)',
+            'radial-gradient(circle at 70% 60%, rgba(251,146,60,0.13) 0%, transparent 50%), radial-gradient(circle at 30% 40%, rgba(245,158,11,0.10) 0%, transparent 50%)',
+            'radial-gradient(circle at 30% 40%, rgba(251,146,60,0.13) 0%, transparent 50%), radial-gradient(circle at 70% 60%, rgba(245,158,11,0.10) 0%, transparent 50%)',
           ],
         }}
         transition={{ duration: 10, repeat: Infinity, ease: 'linear' }}
@@ -81,33 +81,33 @@ export function ActiveSessionScreen({ prefs, session, sendCmd }: Props) {
         {/* Centre — breathing orb + timer */}
         <div className="flex-1 flex flex-col items-center justify-center gap-8">
           {/* Breathing orb */}
-          <div className="relative w-36 h-36 flex items-center justify-center">
+          <div className="relative w-32 h-32 flex items-center justify-center">
             <motion.div
-              animate={{ scale: [1, 1.35, 1], opacity: [0.3, 0.6, 0.3] }}
+              animate={{ scale: [1, 1.25, 1], opacity: [0.2, 0.4, 0.2] }}
               transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut' }}
-              className="absolute inset-0 rounded-full bg-gradient-to-br from-orange-400/40 to-amber-400/40"
+              className="absolute inset-0 rounded-full bg-gradient-to-br from-orange-400/30 to-amber-400/30"
               style={{ filter: 'blur(28px)' }}
             />
             <motion.div
-              animate={{ scale: [1, 1.18, 1], rotate: [0, 6, 0] }}
+              animate={{ scale: [1, 1.12, 1], rotate: [0, 4, 0] }}
               transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut' }}
-              className="w-28 h-28 rounded-full bg-gradient-to-br from-orange-500/40 to-amber-500/40 backdrop-blur-sm"
+              className="w-24 h-24 rounded-full bg-gradient-to-br from-orange-500/30 to-amber-500/30 backdrop-blur-sm"
             />
           </div>
 
           {/* Countdown */}
           <div className="text-center">
-            <div className="text-xs tracking-widest uppercase text-orange-300/50 mb-3" style={{ fontWeight: 500 }}>
+            <div className="text-sm tracking-widest uppercase text-orange-300/70 mb-3" style={{ fontWeight: 500 }}>
               Time remaining
             </div>
-            <div className="text-6xl text-white tracking-wide tabular-nums" style={{ fontWeight: 250 }}>
+            <div className="text-5xl text-white tracking-wide tabular-nums" style={{ fontWeight: 300 }}>
               {fmtCountdown(session.timeRemaining)}
             </div>
-            <div className="text-sm text-orange-300/60 mt-3" style={{ fontWeight: 350 }}>
+            <div className="text-sm text-orange-300/75 mt-3" style={{ fontWeight: 400 }}>
               Bedtime: {fmt12h(prefs.bedtime)}
             </div>
             {session.pickupCount > 0 && (
-              <div className="text-xs text-orange-400/40 mt-1" style={{ fontWeight: 350 }}>
+              <div className="text-sm text-orange-400/65 mt-1" style={{ fontWeight: 400 }}>
                 {session.pickupCount} pickup{session.pickupCount !== 1 ? 's' : ''}
               </div>
             )}
@@ -123,8 +123,8 @@ export function ActiveSessionScreen({ prefs, session, sendCmd }: Props) {
               transition={{ duration: 0.5 }}
               className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-orange-950/30 border border-orange-800/25"
             >
-              <Sparkles className="w-3.5 h-3.5 text-orange-400/60 shrink-0" />
-              <span className="text-sm text-orange-200/65" style={{ fontWeight: 350 }}>{NUDGES[nudgeIdx]}</span>
+              <Sparkles className="w-3.5 h-3.5 text-orange-400/75 shrink-0" />
+              <span className="text-sm text-orange-200/80" style={{ fontWeight: 400 }}>{NUDGES[nudgeIdx]}</span>
             </motion.div>
           </AnimatePresence>
         </div>
@@ -154,23 +154,23 @@ export function ActiveSessionScreen({ prefs, session, sendCmd }: Props) {
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.92, opacity: 0 }}
               onClick={(e) => e.stopPropagation()}
-              className="bg-gradient-to-b from-orange-950 to-slate-950 rounded-3xl p-6 w-full border border-orange-800/30"
+              className="bg-gradient-to-b from-orange-950/60 to-slate-900/98 rounded-2xl p-6 w-full max-w-sm border border-orange-900/40"
             >
               <h2 className="text-xl text-white mb-2" style={{ fontWeight: 400 }}>End ritual early?</h2>
-              <p className="text-orange-200/65 text-sm mb-6" style={{ fontWeight: 350 }}>
+              <p className="text-orange-200/70 text-sm mb-6" style={{ fontWeight: 400 }}>
                 You still have {minutes} minute{minutes !== 1 ? 's' : ''} remaining.
               </p>
               <div className="space-y-2.5">
                 <button
                   onClick={() => sendCmd({ cmd: 'stop_session' })}
-                  className="w-full py-3.5 rounded-2xl bg-orange-600 hover:bg-orange-500 text-white transition-colors"
+                  className="w-full py-3.5 rounded-xl bg-orange-700/80 hover:bg-orange-700 text-orange-50 transition-colors"
                   style={{ fontWeight: 500 }}
                 >
                   End ritual
                 </button>
                 <button
                   onClick={() => setShowEnd(false)}
-                  className="w-full py-2.5 text-orange-300/70 hover:text-orange-200 transition-colors text-sm"
+                  className="w-full py-2.5 text-orange-300/55 hover:text-orange-200/80 transition-colors text-sm"
                   style={{ fontWeight: 400 }}
                 >
                   Continue unwinding
