@@ -1,6 +1,6 @@
 import { useState } from 'react'
-import { motion } from 'motion/react'
-import { Bell, Smartphone } from 'lucide-react'
+import { motion, AnimatePresence } from 'motion/react'
+import { Bell, Smartphone, SlidersHorizontal } from 'lucide-react'
 import { UnwindLogo } from './UnwindLogo'
 import type { Prefs, SendCmd } from '../App'
 
@@ -15,6 +15,7 @@ function fmt12h(t: string): string {
 
 export function ReminderScreen({ isPulsing, prefs, sendCmd }: Props) {
   const [phoneDocked, setPhoneDocked] = useState(false)
+  const [showDebug, setShowDebug] = useState(false)
 
   return (
     <div className="size-full relative overflow-hidden">
@@ -107,29 +108,9 @@ export function ReminderScreen({ isPulsing, prefs, sendCmd }: Props) {
         <div className="w-full space-y-3 max-w-sm">
           {isPulsing ? (
             <>
-              {/* Dock toggle */}
               <button
-                onClick={() => setPhoneDocked((d) => !d)}
-                className={`w-full py-4 rounded-2xl transition-all flex items-center justify-center gap-2.5 border ${
-                  phoneDocked
-                    ? 'bg-orange-900/40 border-orange-600/50 text-orange-200'
-                    : 'bg-orange-950/25 border-orange-800/25 text-orange-400/70'
-                }`}
-              >
-                <Smartphone className="w-4 h-4" />
-                <span className="text-sm" style={{ fontWeight: 400 }}>
-                  {phoneDocked ? 'Phone is docked ✓' : 'Tap to simulate dock'}
-                </span>
-              </button>
-
-              <button
-                disabled={!phoneDocked}
                 onClick={() => sendCmd({ cmd: 'start_session' })}
-                className={`w-full py-4 rounded-2xl text-lg transition-all ${
-                  phoneDocked
-                    ? 'bg-orange-700/80 hover:bg-orange-700 text-orange-50'
-                    : 'bg-orange-950/20 text-orange-700/40 cursor-not-allowed'
-                }`}
+                className="w-full py-4 rounded-2xl text-lg bg-orange-700/80 hover:bg-orange-700 text-orange-50 transition-colors"
                 style={{ fontWeight: 500 }}
               >
                 Start Unwind
@@ -153,6 +134,35 @@ export function ReminderScreen({ isPulsing, prefs, sendCmd }: Props) {
             </button>
           )}
         </div>
+      </div>
+      {/* Debug menu — bottom right */}
+      <div className="absolute bottom-4 right-4 z-20">
+        <button
+          onClick={() => setShowDebug(d => !d)}
+          className="w-8 h-8 rounded-full bg-white/5 border border-white/8 flex items-center justify-center hover:bg-white/10 transition-colors"
+        >
+          <SlidersHorizontal className="w-3.5 h-3.5 text-slate-500" />
+        </button>
+        <AnimatePresence>
+          {showDebug && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.92, y: 6 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.92, y: 6 }}
+              transition={{ duration: 0.15 }}
+              className="absolute bottom-10 right-0 bg-slate-900/95 border border-slate-700/50 rounded-xl p-3 w-48"
+            >
+              <p className="text-xs text-slate-500 mb-2 tracking-wide uppercase">Simulate</p>
+              <button
+                onClick={() => { setPhoneDocked(d => !d); setShowDebug(false) }}
+                className="w-full text-left text-sm text-slate-300 hover:text-white px-2 py-1.5 rounded-lg hover:bg-white/5 transition-colors flex items-center gap-2"
+              >
+                <Smartphone className="w-3.5 h-3.5 shrink-0" />
+                {phoneDocked ? 'Undock phone' : 'Dock phone'}
+              </button>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </div>
   )

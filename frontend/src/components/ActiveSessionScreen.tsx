@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
-import { Sparkles, X, Phone } from 'lucide-react'
+import { Sparkles, X, Phone, SlidersHorizontal } from 'lucide-react'
 import { UnwindLogo } from './UnwindLogo'
 import type { Prefs, SessionState, SendCmd } from '../App'
 
@@ -35,6 +35,7 @@ function fmtCountdown(secs: number): string {
 export function ActiveSessionScreen({ prefs, session, sendCmd }: Props) {
   const [nudgeIdx, setNudgeIdx] = useState(0)
   const [showEnd, setShowEnd] = useState(false)
+  const [showDebug, setShowDebug] = useState(false)
 
   useEffect(() => {
     const t = setInterval(() => setNudgeIdx((i) => (i + 1) % NUDGES.length), 45_000)
@@ -129,14 +130,36 @@ export function ActiveSessionScreen({ prefs, session, sendCmd }: Props) {
           </AnimatePresence>
         </div>
 
-        {/* Simulate pickup (desktop testing) */}
+      </div>
+
+      {/* Debug menu — bottom right */}
+      <div className="absolute bottom-4 right-4 z-20">
         <button
-          onClick={() => sendCmd({ cmd: 'pickup' })}
-          className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-white/5 border border-white/8 hover:bg-white/10 transition-colors"
+          onClick={() => setShowDebug(d => !d)}
+          className="w-8 h-8 rounded-full bg-white/5 border border-white/8 flex items-center justify-center hover:bg-white/10 transition-colors"
         >
-          <Phone className="w-4 h-4 text-gray-500" />
-          <span className="text-xs text-gray-500">Simulate phone pickup</span>
+          <SlidersHorizontal className="w-3.5 h-3.5 text-slate-500" />
         </button>
+        <AnimatePresence>
+          {showDebug && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.92, y: 6 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.92, y: 6 }}
+              transition={{ duration: 0.15 }}
+              className="absolute bottom-10 right-0 bg-slate-900/95 border border-slate-700/50 rounded-xl p-3 w-44"
+            >
+              <p className="text-xs text-slate-500 mb-2 tracking-wide uppercase">Simulate</p>
+              <button
+                onClick={() => { sendCmd({ cmd: 'pickup' }); setShowDebug(false) }}
+                className="w-full text-left text-sm text-slate-300 hover:text-white px-2 py-1.5 rounded-lg hover:bg-white/5 transition-colors flex items-center gap-2"
+              >
+                <Phone className="w-3.5 h-3.5 shrink-0" />
+                Phone pickup
+              </button>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
 
       {/* End session confirmation */}
