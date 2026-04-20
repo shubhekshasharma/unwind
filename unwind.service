@@ -5,13 +5,13 @@ Wants=graphical-session.target
 
 [Service]
 Type=simple
-User=pi
-WorkingDirectory=/home/pi/unwind
-ExecStart=/home/pi/unwind/start.sh
+User=subu
+WorkingDirectory=/home/subu/unwind
+ExecStart=/home/subu/unwind/start.sh
 Restart=on-failure
 RestartSec=5
 Environment=DISPLAY=:0
-Environment=XAUTHORITY=/home/pi/.Xauthority
+Environment=XAUTHORITY=/home/subu/.Xauthority
 
 [Install]
 WantedBy=graphical-session.target

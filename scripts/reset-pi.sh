@@ -5,8 +5,8 @@
 set -e
 
 PI_HOST="${1:-raspberrypi.local}"
-PI_USER="pi"
-PI_PATH="/home/pi/unwind"
+PI_USER="subu"
+PI_PATH="/home/subu/unwind"
 
 echo "▶ Resetting Unwind on ${PI_HOST}..."
 

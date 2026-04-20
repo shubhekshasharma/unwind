@@ -12,8 +12,8 @@ PI_HOST="${1:-raspberrypi.local}"
 NO_RESTART=false
 [[ "$2" == "--no-restart" ]] && NO_RESTART=true
 
-PI_USER="pi"
-PI_PATH="/home/pi/unwind"
+PI_USER="subu"
+PI_PATH="/home/subu/unwind"
 PI_DEST="${PI_USER}@${PI_HOST}:${PI_PATH}"
 
 echo "▶ Syncing Unwind to ${PI_HOST}..."

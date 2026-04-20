@@ -4,7 +4,7 @@
 # Or run remotely:           ssh pi@raspberrypi.local 'bash -s' < scripts/setup-pi.sh
 set -e
 
-INSTALL_DIR="/home/pi/unwind"
+INSTALL_DIR="/home/subu/unwind"
 
 echo "▶ Setting up Unwind on Raspberry Pi..."
 
@@ -12,7 +12,7 @@ echo "▶ Setting up Unwind on Raspberry Pi..."
 echo "  [apt] installing system packages..."
 sudo apt update -qq
 sudo apt install -y \
-  chromium-browser \
+  chromium \
   mosquitto \
   mosquitto-clients \
   python3-pip \

@@ -28,9 +28,9 @@ BACKEND_PID=$!
 sleep 2
 
 # Launch browser in kiosk mode
-if command -v chromium-browser &>/dev/null; then
+if command -v chromium &>/dev/null; then
   # Raspberry Pi OS
-  chromium-browser \
+  chromium \
     --kiosk \
     --noerrdialogs \
     --disable-infobars \
