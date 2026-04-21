@@ -2,9 +2,9 @@ import { useState } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
 import { Bell, Smartphone, SlidersHorizontal } from 'lucide-react'
 import { UnwindLogo } from './UnwindLogo'
-import type { Prefs, SendCmd } from '../App'
+import type { Prefs, SessionState, SendCmd } from '../App'
 
-type Props = { isPulsing: boolean; prefs: Prefs; sendCmd: SendCmd }
+type Props = { isPulsing: boolean; prefs: Prefs; session: SessionState; sendCmd: SendCmd }
 
 function fmt12h(t: string): string {
   try {
@@ -13,8 +13,7 @@ function fmt12h(t: string): string {
   } catch { return t }
 }
 
-export function ReminderScreen({ isPulsing, prefs, sendCmd }: Props) {
-  const [phoneDocked, setPhoneDocked] = useState(false)
+export function ReminderScreen({ isPulsing, prefs, session, sendCmd }: Props) {
   const [showDebug, setShowDebug] = useState(false)
 
   return (
@@ -110,10 +109,11 @@ export function ReminderScreen({ isPulsing, prefs, sendCmd }: Props) {
             <>
               <button
                 onClick={() => sendCmd({ cmd: 'start_session' })}
-                className="w-full py-4 rounded-2xl text-lg bg-orange-700/80 hover:bg-orange-700 text-orange-50 transition-colors"
+                disabled={!session.isPhoneDocked}
+                className="w-full py-4 rounded-2xl text-lg bg-orange-700/80 hover:bg-orange-700 text-orange-50 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                 style={{ fontWeight: 500 }}
               >
-                Start Unwind
+                {session.isPhoneDocked ? 'Start Unwind' : 'Dock your phone to begin'}
               </button>
 
               <button
@@ -154,11 +154,11 @@ export function ReminderScreen({ isPulsing, prefs, sendCmd }: Props) {
             >
               <p className="text-xs text-slate-500 mb-2 tracking-wide uppercase">Simulate</p>
               <button
-                onClick={() => { setPhoneDocked(d => !d); setShowDebug(false) }}
+                onClick={() => { sendCmd({ cmd: session.isPhoneDocked ? 'pickup' : 'dock' }); setShowDebug(false) }}
                 className="w-full text-left text-sm text-slate-300 hover:text-white px-2 py-1.5 rounded-lg hover:bg-white/5 transition-colors flex items-center gap-2"
               >
                 <Smartphone className="w-3.5 h-3.5 shrink-0" />
-                {phoneDocked ? 'Undock phone' : 'Dock phone'}
+                {session.isPhoneDocked ? 'Undock phone' : 'Dock phone'}
               </button>
             </motion.div>
           )}

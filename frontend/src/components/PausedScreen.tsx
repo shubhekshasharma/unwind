@@ -1,28 +1,32 @@
 import { motion } from 'motion/react'
-import { AlertTriangle, Phone } from 'lucide-react'
+import { Phone } from 'lucide-react'
 import type { Prefs, SessionState, SendCmd } from '../App'
 
 type Props = { prefs: Prefs; session: SessionState; sendCmd: SendCmd }
 
-function fmt12h(t: string): string {
-  try {
-    const [h, m] = t.split(':').map(Number)
-    return `${h % 12 || 12}:${String(m).padStart(2, '0')} ${h >= 12 ? 'PM' : 'AM'}`
-  } catch { return t }
+function sleepWindowMins(bedtime: string, wakeTime: string): number {
+  const [bh, bm] = bedtime.split(':').map(Number)
+  const [wh, wm] = wakeTime.split(':').map(Number)
+  const bed = bh * 60 + bm
+  const wake = wh * 60 + wm
+  return wake > bed ? wake - bed : 1440 - bed + wake
 }
 
-function fmtCost(secs: number): string {
-  const s = Math.floor(secs)
-  const m = Math.floor(s / 60)
-  return `${m}:${String(s % 60).padStart(2, '0')}`
+function fmtWindow(mins: number): string {
+  const m = Math.max(0, mins)
+  const h = Math.floor(m / 60)
+  const rem = m % 60
+  return h > 0 ? `${h}h ${rem}m` : `${rem}m`
 }
 
 export function PausedScreen({ prefs, session, sendCmd }: Props) {
-  const costMins = Math.floor(session.pausedSecs / 60)
+  const totalMins = sleepWindowMins(prefs.bedtime, prefs.wakeTime)
+  const lostMins = Math.floor(session.pausedSecs / 60)
+  const remainingMins = Math.max(0, totalMins - lostMins)
+  const barPct = totalMins > 0 ? (remainingMins / totalMins) * 100 : 0
 
   return (
     <div className="size-full relative overflow-hidden">
-      {/* Warm-red pulsing background */}
       <motion.div
         className="absolute inset-0"
         animate={{
@@ -41,10 +45,15 @@ export function PausedScreen({ prefs, session, sendCmd }: Props) {
           <span className="text-sm tracking-widest uppercase text-rose-300/85" style={{ fontWeight: 500 }}>
             Session paused
           </span>
+          {session.pickupCount > 0 && (
+            <span className="ml-3 text-xs text-rose-400/55" style={{ fontWeight: 400 }}>
+              {session.pickupCount} pickup{session.pickupCount !== 1 ? 's' : ''}
+            </span>
+          )}
         </div>
 
-        {/* Centre content */}
-        <div className="flex-1 flex flex-col items-center justify-center gap-6">
+        {/* Centre */}
+        <div className="flex-1 flex flex-col items-center justify-center gap-7 w-full max-w-xs mx-auto">
           {/* Pulsing icon */}
           <motion.div
             animate={{ scale: [1, 1.07, 1] }}
@@ -60,55 +69,43 @@ export function PausedScreen({ prefs, session, sendCmd }: Props) {
             <p className="text-rose-200/75 text-base" style={{ fontWeight: 400 }}>Every minute counts</p>
           </div>
 
-          {/* Sleep cost counter */}
-          <div className="text-center">
-            <div className="text-sm tracking-widest uppercase text-rose-300/75 mb-2" style={{ fontWeight: 500 }}>
-              Sleep time lost
-            </div>
-            <div className="text-5xl text-rose-200 tabular-nums" style={{ fontWeight: 300 }}>
-              {fmtCost(session.pausedSecs)}
-            </div>
-            <div className="text-sm text-rose-200/65 mt-2" style={{ fontWeight: 400 }}>
-              of sleep replaced by screen time
-            </div>
+          {/* Dock warning callout — non-interactive */}
+          <div className="w-full rounded-2xl bg-rose-950/35 border border-rose-700/30 px-5 py-4 flex items-center gap-3">
+            <Phone className="w-5 h-5 text-rose-400/75 shrink-0" />
+            <span className="text-sm text-rose-100/80 leading-snug" style={{ fontWeight: 400 }}>
+              Place your phone back on the dock to resume
+            </span>
           </div>
 
-          {/* Warning badge */}
-          {costMins >= 1 && (
-            <motion.div
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-rose-950/40 border border-rose-800/30"
-            >
-              <AlertTriangle className="w-4 h-4 text-rose-400/80 shrink-0" />
-              <span className="text-sm text-rose-100/70" style={{ fontWeight: 400 }}>
-                {costMins} min{costMins !== 1 ? 's' : ''} of sleep lost
-              </span>
-            </motion.div>
-          )}
-
-          <p className="text-orange-200/70 text-sm text-center max-w-xs" style={{ fontWeight: 400 }}>
-            Bedtime {fmt12h(prefs.bedtime)} · Wake {fmt12h(prefs.wakeTime)}
-          </p>
+          {/* Sleep window bar */}
+          <div className="w-full">
+            <div className="text-xs tracking-widest uppercase text-rose-300/60 mb-3" style={{ fontWeight: 500 }}>
+              Sleep window tonight
+            </div>
+            <div className="w-full h-3 rounded-full bg-rose-950/50 border border-rose-900/40 overflow-hidden">
+              <motion.div
+                className="h-full rounded-full bg-gradient-to-r from-rose-500/70 to-orange-400/60"
+                animate={{ width: `${barPct}%` }}
+                transition={{ duration: 0.8, ease: 'easeOut' }}
+              />
+            </div>
+            <div className="mt-3 text-3xl text-rose-100 tabular-nums" style={{ fontWeight: 300 }}>
+              {fmtWindow(remainingMins)}
+            </div>
+            <div className="text-xs text-rose-300/50 mt-1" style={{ fontWeight: 400 }}>
+              available if you sleep now
+            </div>
+          </div>
         </div>
 
-        {/* Actions */}
-        <div className="w-full max-w-xs mx-auto space-y-3">
-          <button
-            onClick={() => sendCmd({ cmd: 'dock' })}
-            className="w-full py-4 rounded-xl bg-orange-700/80 hover:bg-orange-700 text-orange-50 text-lg transition-colors"
-            style={{ fontWeight: 500 }}
-          >
-            Dock phone & continue
-          </button>
-          <button
-            onClick={() => sendCmd({ cmd: 'stop_session' })}
-            className="w-full py-2.5 text-orange-300/55 hover:text-orange-200/80 transition-colors text-sm"
-            style={{ fontWeight: 400 }}
-          >
-            End session &amp; sleep
-          </button>
-        </div>
+        {/* End session link */}
+        <button
+          onClick={() => sendCmd({ cmd: 'stop_session' })}
+          className="w-full max-w-xs py-3 text-rose-300/50 hover:text-rose-200/80 transition-colors text-sm"
+          style={{ fontWeight: 400 }}
+        >
+          End session &amp; sleep
+        </button>
       </div>
     </div>
   )

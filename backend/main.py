@@ -169,6 +169,8 @@ class AppState:
     def start_session(self):
         if self.session["is_running"]:
             return
+        if not self.session["is_phone_docked"]:
+            return
         now = time.time()
         self.session.update(
             timer_start=now,
@@ -465,16 +467,20 @@ async def force_sensor_task():
             if value >= DOCK_THRESHOLD:
                 high_run += 1
                 low_run = 0
-                # Phone placed back on dock during an active session
                 if high_run == DEBOUNCE_COUNT and not is_docked:
-                    state.dock_phone()
+                    if state.session["is_running"]:
+                        state.dock_phone()
+                    else:
+                        state.session["is_phone_docked"] = True
                     await manager.broadcast(state.to_client_state())
             else:
                 low_run += 1
                 high_run = 0
-                # Phone lifted from dock during an active session
-                if low_run == DEBOUNCE_COUNT and is_docked and state.session["is_running"]:
-                    state.pickup_phone()
+                if low_run == DEBOUNCE_COUNT and is_docked:
+                    if state.session["is_running"]:
+                        state.pickup_phone()
+                    else:
+                        state.session["is_phone_docked"] = False
                     await manager.broadcast(state.to_client_state())
     finally:
         try:

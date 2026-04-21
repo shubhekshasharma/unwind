@@ -130,6 +130,15 @@ export function ActiveSessionScreen({ prefs, session, sendCmd }: Props) {
           </AnimatePresence>
         </div>
 
+        {/* End session */}
+        <button
+          onClick={() => setShowEnd(true)}
+          className="w-full max-w-xs py-3 text-orange-300/40 hover:text-orange-200/70 transition-colors text-sm"
+          style={{ fontWeight: 400 }}
+        >
+          End session early
+        </button>
+
       </div>
 
       {/* Debug menu — bottom right */}

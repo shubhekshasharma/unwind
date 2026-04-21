@@ -19,7 +19,8 @@ PI_DEST="${PI_USER}@${PI_HOST}:${PI_PATH}"
 echo "▶ Syncing Unwind to ${PI_HOST}..."
 
 # ── Build frontend ─────────────────────────────────────────────────────────
-echo "  [frontend] building..."
+echo "  [frontend] cleaning and building..."
+rm -rf frontend/node_modules frontend/dist
 cd frontend
 npm install --silent
 npm run build

@@ -27,20 +27,18 @@ BACKEND_PID=$!
 # Give backend a moment to start
 sleep 2
 
+# Kill any existing Chromium instance pointing at this app before relaunching
+pkill -f "chromium.*localhost:8000" 2>/dev/null || true
+sleep 1
+
 # Launch browser in kiosk mode
 if command -v chromium &>/dev/null; then
-  # Raspberry Pi OS
   chromium \
     --kiosk \
     --noerrdialogs \
     --disable-infobars \
     --disable-restore-session-state \
-    --app=http://localhost:8000 &
-elif command -v chromium &>/dev/null; then
-  chromium \
-    --kiosk \
-    --noerrdialogs \
-    --disable-infobars \
+    --disk-cache-size=1 \
     --app=http://localhost:8000 &
 elif command -v open &>/dev/null; then
   # macOS — open in default browser for dev

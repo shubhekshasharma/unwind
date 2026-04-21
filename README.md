@@ -135,7 +135,7 @@ SSH into the Pi and run the setup script — it installs all dependencies, confi
 
 ```bash
 # Option A: run remotely from your Mac
-ssh pi@raspberrypi.local 'bash -s' < scripts/setup-pi.sh
+ssh subu@192.168.1.92 'bash -s' < scripts/setup-pi.sh
 
 # Option B: copy to Pi first, then run on it
 scp scripts/setup-pi.sh pi@raspberrypi.local:~

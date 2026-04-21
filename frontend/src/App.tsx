@@ -130,10 +130,10 @@ export default function App() {
         <HomeScreen prefs={prefs} session={session} sendCmd={sendCmd} />
       )}
       {screen === 'reminder' && (
-        <ReminderScreen isPulsing={false} prefs={prefs} sendCmd={sendCmd} />
+        <ReminderScreen isPulsing={false} prefs={prefs} session={session} sendCmd={sendCmd} />
       )}
       {screen === 'reminderPulse' && (
-        <ReminderScreen isPulsing={true} prefs={prefs} sendCmd={sendCmd} />
+        <ReminderScreen isPulsing={true} prefs={prefs} session={session} sendCmd={sendCmd} />
       )}
       {screen === 'session' && (
         <ActiveSessionScreen prefs={prefs} session={session} sendCmd={sendCmd} />
