@@ -1,0 +1,6 @@
+# Raspberry Pi-only dependencies
+# Install on the Pi after the main requirements:
+#   pip install -r requirements.txt
+#   pip install -r requirements-pi.txt
+
+spidev==3.6

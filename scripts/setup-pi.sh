@@ -36,6 +36,7 @@ cd "$INSTALL_DIR"
 python3 -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt --quiet
+pip install -r requirements-pi.txt --quiet
 echo "  [python] deps installed ✓"
 
 # ── systemd service ────────────────────────────────────────────────────────

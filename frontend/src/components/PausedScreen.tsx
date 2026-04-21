@@ -22,23 +22,23 @@ export function PausedScreen({ prefs, session, sendCmd }: Props) {
 
   return (
     <div className="size-full relative overflow-hidden">
-      {/* Jarring warm-red pulsing background */}
+      {/* Warm-red pulsing background */}
       <motion.div
         className="absolute inset-0"
         animate={{
           background: [
-            'radial-gradient(circle at 50% 40%, rgba(220,60,30,0.7) 0%, rgba(60,10,5,1) 65%)',
-            'radial-gradient(circle at 50% 40%, rgba(245,80,40,0.9) 0%, rgba(60,10,5,1) 65%)',
-            'radial-gradient(circle at 50% 40%, rgba(220,60,30,0.7) 0%, rgba(60,10,5,1) 65%)',
+            'radial-gradient(circle at 50% 40%, rgba(160,35,15,0.30) 0%, rgba(15,10,10,1) 65%)',
+            'radial-gradient(circle at 50% 40%, rgba(175,42,18,0.42) 0%, rgba(15,10,10,1) 65%)',
+            'radial-gradient(circle at 50% 40%, rgba(160,35,15,0.30) 0%, rgba(15,10,10,1) 65%)',
           ],
         }}
-        transition={{ duration: 1.3, repeat: Infinity }}
+        transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
       />
 
       <div className="relative size-full flex flex-col items-center justify-between p-7">
         {/* Status */}
         <div className="w-full text-center">
-          <span className="text-xs tracking-widest uppercase text-red-400/80" style={{ fontWeight: 500 }}>
+          <span className="text-sm tracking-widest uppercase text-rose-300/85" style={{ fontWeight: 500 }}>
             Session paused
           </span>
         </div>
@@ -47,28 +47,28 @@ export function PausedScreen({ prefs, session, sendCmd }: Props) {
         <div className="flex-1 flex flex-col items-center justify-center gap-6">
           {/* Pulsing icon */}
           <motion.div
-            animate={{ scale: [1, 1.18, 1] }}
-            transition={{ duration: 1.3, repeat: Infinity }}
-            className="w-24 h-24 rounded-full bg-red-600/25 border-2 border-red-500/60 flex items-center justify-center"
+            animate={{ scale: [1, 1.07, 1] }}
+            transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
+            className="w-20 h-20 rounded-full bg-rose-950/40 border border-rose-800/35 flex items-center justify-center"
           >
-            <Phone className="w-10 h-10 text-red-300" />
+            <Phone className="w-9 h-9 text-rose-300/65" />
           </motion.div>
 
           {/* Headline */}
           <div className="text-center">
-            <h1 className="text-4xl text-white mb-1" style={{ fontWeight: 400 }}>Scrolling?</h1>
-            <p className="text-red-200/60 text-sm" style={{ fontWeight: 350 }}>Every minute counts</p>
+            <h1 className="text-3xl text-white mb-1" style={{ fontWeight: 400 }}>Scrolling?</h1>
+            <p className="text-rose-200/75 text-base" style={{ fontWeight: 400 }}>Every minute counts</p>
           </div>
 
           {/* Sleep cost counter */}
           <div className="text-center">
-            <div className="text-xs tracking-widest uppercase text-red-400/60 mb-2" style={{ fontWeight: 500 }}>
+            <div className="text-sm tracking-widest uppercase text-rose-300/75 mb-2" style={{ fontWeight: 500 }}>
               Sleep time lost
             </div>
-            <div className="text-6xl text-red-300 tabular-nums" style={{ fontWeight: 300 }}>
+            <div className="text-5xl text-rose-200 tabular-nums" style={{ fontWeight: 300 }}>
               {fmtCost(session.pausedSecs)}
             </div>
-            <div className="text-sm text-red-200/50 mt-2" style={{ fontWeight: 350 }}>
+            <div className="text-sm text-rose-200/65 mt-2" style={{ fontWeight: 400 }}>
               of sleep replaced by screen time
             </div>
           </div>
@@ -78,32 +78,32 @@ export function PausedScreen({ prefs, session, sendCmd }: Props) {
             <motion.div
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
-              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-red-900/30 border border-red-700/30"
+              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-rose-950/40 border border-rose-800/30"
             >
-              <AlertTriangle className="w-4 h-4 text-red-400 shrink-0" />
-              <span className="text-sm text-red-200/80" style={{ fontWeight: 400 }}>
+              <AlertTriangle className="w-4 h-4 text-rose-400/80 shrink-0" />
+              <span className="text-sm text-rose-100/70" style={{ fontWeight: 400 }}>
                 {costMins} min{costMins !== 1 ? 's' : ''} of sleep lost
               </span>
             </motion.div>
           )}
 
-          <p className="text-orange-200/50 text-sm text-center max-w-xs" style={{ fontWeight: 350 }}>
+          <p className="text-orange-200/70 text-sm text-center max-w-xs" style={{ fontWeight: 400 }}>
             Bedtime {fmt12h(prefs.bedtime)} · Wake {fmt12h(prefs.wakeTime)}
           </p>
         </div>
 
         {/* Actions */}
-        <div className="w-full space-y-3">
+        <div className="w-full max-w-xs mx-auto space-y-3">
           <button
             onClick={() => sendCmd({ cmd: 'dock' })}
-            className="w-full py-4 rounded-2xl bg-orange-600 hover:bg-orange-500 text-white text-lg transition-colors"
+            className="w-full py-4 rounded-xl bg-orange-700/80 hover:bg-orange-700 text-orange-50 text-lg transition-colors"
             style={{ fontWeight: 500 }}
           >
             Dock phone & continue
           </button>
           <button
             onClick={() => sendCmd({ cmd: 'stop_session' })}
-            className="w-full py-3 rounded-2xl bg-white/5 border border-white/10 text-orange-200/60 hover:text-orange-100 transition-colors text-sm"
+            className="w-full py-2.5 text-orange-300/55 hover:text-orange-200/80 transition-colors text-sm"
             style={{ fontWeight: 400 }}
           >
             End session &amp; sleep

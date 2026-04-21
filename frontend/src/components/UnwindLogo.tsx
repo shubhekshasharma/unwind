@@ -10,7 +10,7 @@ export function UnwindLogo({ size = 32, animate = false }: UnwindLogoProps) {
     <motion.svg
       width={size}
       height={size}
-      viewBox="0 0 40 40"
+      viewBox="0 -4 40 40"
       fill="none"
       animate={animate ? { rotate: [0, -5, 5, 0] } : {}}
       transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}

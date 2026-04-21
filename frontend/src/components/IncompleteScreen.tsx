@@ -36,7 +36,7 @@ export function IncompleteScreen({ prefs, session, sendCmd }: Props) {
       <div className="relative size-full flex flex-col items-center justify-between p-7">
         {/* Status */}
         <div className="w-full text-center">
-          <span className="text-xs tracking-widest uppercase text-amber-500/70" style={{ fontWeight: 500 }}>
+          <span className="text-sm tracking-widest uppercase text-amber-400/85" style={{ fontWeight: 500 }}>
             Ritual incomplete
           </span>
         </div>
@@ -49,17 +49,17 @@ export function IncompleteScreen({ prefs, session, sendCmd }: Props) {
 
           {/* Progress display */}
           <div className="text-center">
-            <div className="text-xl text-amber-200/80" style={{ fontWeight: 350 }}>
+            <div className="text-xl text-amber-200/90" style={{ fontWeight: 400 }}>
               You completed{' '}
-              <span className="text-white" style={{ fontWeight: 500 }}>{completedMins}</span>
+              <span className="text-white" style={{ fontWeight: 600 }}>{completedMins}</span>
               {' '}of{' '}
-              <span className="text-white" style={{ fontWeight: 500 }}>{totalMins}</span>
+              <span className="text-white" style={{ fontWeight: 600 }}>{totalMins}</span>
               {' '}minutes
             </div>
           </div>
 
           {/* Progress bar */}
-          <div className="w-full rounded-full bg-white/10 h-2.5 overflow-hidden">
+          <div className="w-full rounded-full bg-white/10 h-3 overflow-hidden">
             <motion.div
               className="h-full rounded-full bg-gradient-to-r from-orange-600 to-amber-500"
               initial={{ width: 0 }}
@@ -70,19 +70,19 @@ export function IncompleteScreen({ prefs, session, sendCmd }: Props) {
 
           {/* Sub message */}
           {remainingMins > 0 ? (
-            <p className="text-orange-200/60 text-sm text-center max-w-xs" style={{ fontWeight: 350 }}>
+            <p className="text-orange-200/75 text-sm text-center max-w-xs" style={{ fontWeight: 400 }}>
               Continuing means {remainingMins} more minute{remainingMins !== 1 ? 's' : ''} past your{' '}
               {fmt12h(prefs.bedtime)} bedtime.
             </p>
           ) : (
-            <p className="text-green-400/70 text-sm text-center" style={{ fontWeight: 350 }}>
+            <p className="text-green-400/80 text-sm text-center" style={{ fontWeight: 400 }}>
               You completed the full ritual. Time to sleep!
             </p>
           )}
 
-          <div className="flex items-center gap-2 text-orange-300/40">
+          <div className="flex items-center gap-2 text-orange-300/65">
             <Moon className="w-5 h-5" />
-            <span className="text-sm" style={{ fontWeight: 350 }}>Wake time: {fmt12h(prefs.wakeTime)}</span>
+            <span className="text-sm" style={{ fontWeight: 400 }}>Wake time: {fmt12h(prefs.wakeTime)}</span>
           </div>
         </div>
 

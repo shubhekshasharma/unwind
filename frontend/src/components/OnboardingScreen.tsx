@@ -80,7 +80,7 @@ export function OnboardingScreen({ prefs, sendCmd }: Props) {
                   <h1 className="text-3xl text-white mb-3" style={{ fontWeight: 400 }}>
                     Welcome to Unwind
                   </h1>
-                  <p className="text-orange-200/70 text-sm leading-relaxed" style={{ fontWeight: 350 }}>
+                  <p className="text-orange-200/80 text-base leading-relaxed" style={{ fontWeight: 400 }}>
                     Create a calming bedtime ritual that helps you put down your phone and drift into restful sleep.
                   </p>
                 </div>
@@ -94,7 +94,7 @@ export function OnboardingScreen({ prefs, sendCmd }: Props) {
                   <h2 className="text-2xl text-white mb-2" style={{ fontWeight: 400 }}>
                     Set your sleep schedule
                   </h2>
-                  <p className="text-orange-200/60 text-sm" style={{ fontWeight: 350 }}>
+                  <p className="text-orange-200/75 text-base" style={{ fontWeight: 400 }}>
                     When do you want to sleep and wake up?
                   </p>
                 </div>
@@ -128,7 +128,7 @@ export function OnboardingScreen({ prefs, sendCmd }: Props) {
                   <h2 className="text-2xl text-white mb-2" style={{ fontWeight: 400 }}>
                     Ritual duration
                   </h2>
-                  <p className="text-orange-200/60 text-sm" style={{ fontWeight: 350 }}>
+                  <p className="text-orange-200/75 text-base" style={{ fontWeight: 400 }}>
                     How long should your wind-down ritual be?
                   </p>
                 </div>
@@ -152,7 +152,7 @@ export function OnboardingScreen({ prefs, sendCmd }: Props) {
                         )}
                       </div>
                       {duration === d && bedtime && (
-                        <div className="text-xs text-orange-400/70 mt-1 text-left" style={{ fontWeight: 350 }}>
+                        <div className="text-sm text-orange-400/80 mt-1 text-left" style={{ fontWeight: 400 }}>
                           Starts at {formatUnwindStart(bedtime, d)}
                         </div>
                       )}

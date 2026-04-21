@@ -63,50 +63,50 @@ export function StatsScreen({ sendCmd }: Props) {
 
       <div className="relative size-full flex flex-col p-6">
         {/* Header */}
-        <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center justify-between mb-5">
           <div className="flex items-center gap-3">
             <button
               onClick={() => sendCmd({ cmd: 'navigate', screen: 'home' })}
               className="p-2 rounded-full hover:bg-orange-900/20 transition-colors"
             >
-              <ArrowLeft className="w-5 h-5 text-orange-400/70" />
+              <ArrowLeft className="w-5 h-5 text-orange-400/80" />
             </button>
             <h1 className="text-xl text-white" style={{ fontWeight: 400 }}>Sleep history</h1>
           </div>
           <button
             onClick={() => setShowResetConfirm(true)}
-            className="flex items-center gap-1.5 text-xs text-red-400/40 hover:text-red-400/70 transition-colors px-3 py-1.5 rounded-full hover:bg-red-950/20"
-            style={{ fontWeight: 400 }}
+            className="flex items-center gap-1.5 text-sm text-red-300/80 hover:text-red-200 transition-colors px-3 py-1.5 rounded-lg border border-red-800/50 bg-red-950/30 hover:bg-red-950/50"
+            style={{ fontWeight: 500 }}
           >
-            <RotateCcw className="w-3 h-3" />
+            <RotateCcw className="w-3.5 h-3.5" />
             Reset
           </button>
         </div>
 
         {/* Summary row */}
         {sessions.length > 0 && (
-          <div className="grid grid-cols-2 gap-3 mb-5">
-            <div className="bg-orange-950/20 border border-orange-800/20 rounded-2xl p-4">
-              <div className="text-xs uppercase tracking-wider text-orange-400/50 mb-1" style={{ fontWeight: 500 }}>Sessions</div>
-              <div className="text-2xl text-white" style={{ fontWeight: 300 }}>{sessions.length}</div>
+          <div className="grid grid-cols-2 gap-3 mb-4">
+            <div className="bg-slate-900/60 border border-slate-700/40 rounded-xl p-3.5">
+              <div className="text-xs uppercase tracking-wider text-orange-400/70 mb-1" style={{ fontWeight: 500 }}>Sessions</div>
+              <div className="text-2xl text-white" style={{ fontWeight: 400 }}>{sessions.length}</div>
             </div>
-            <div className="bg-amber-950/20 border border-amber-800/20 rounded-2xl p-4">
-              <div className="text-xs uppercase tracking-wider text-amber-400/50 mb-1" style={{ fontWeight: 500 }}>Avg duration</div>
-              <div className="text-2xl text-white" style={{ fontWeight: 300 }}>{fmtDuration(avgDuration)}</div>
+            <div className="bg-slate-900/60 border border-slate-700/40 rounded-xl p-3.5">
+              <div className="text-xs uppercase tracking-wider text-amber-400/70 mb-1" style={{ fontWeight: 500 }}>Avg duration</div>
+              <div className="text-2xl text-white" style={{ fontWeight: 400 }}>{fmtDuration(avgDuration)}</div>
             </div>
           </div>
         )}
 
         {/* Session list */}
-        <div className="flex-1 overflow-y-auto space-y-3 pb-2">
+        <div className="flex-1 overflow-y-auto space-y-2 pb-2">
           {loading && (
-            <div className="text-center text-orange-400/40 pt-12 text-sm">Loading…</div>
+            <div className="text-center text-orange-400/65 pt-12 text-sm">Loading…</div>
           )}
 
           {!loading && sessions.length === 0 && (
             <div className="flex flex-col items-center justify-center pt-12 gap-4">
-              <Moon className="w-12 h-12 text-orange-400/20" />
-              <p className="text-orange-200/40 text-sm text-center" style={{ fontWeight: 350 }}>
+              <Moon className="w-12 h-12 text-orange-400/35" />
+              <p className="text-orange-200/65 text-sm text-center" style={{ fontWeight: 400 }}>
                 No completed sessions yet.{'\n'}Complete your first Unwind ritual to see stats here.
               </p>
             </div>
@@ -114,29 +114,30 @@ export function StatsScreen({ sendCmd }: Props) {
 
           {sessions.map((s, i) => {
             const pickups = s.pickup_count || 0
-            const pickupColor = pickups === 0 ? 'text-green-400/80' : pickups > 2 ? 'text-red-400/80' : 'text-orange-400/70'
+            const pickupColor = pickups === 0 ? 'text-green-400' : pickups > 2 ? 'text-red-400' : 'text-orange-400'
 
             return (
               <motion.div
                 key={s.id}
-                initial={{ opacity: 0, y: 12 }}
+                initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.05 }}
-                className="bg-gradient-to-br from-orange-950/20 to-slate-950/40 border border-orange-800/15 rounded-2xl p-5"
+                transition={{ delay: i * 0.04 }}
+                className="bg-slate-900/55 border border-slate-700/35 rounded-xl p-3.5"
               >
-                <div className="text-xs text-orange-400/40 mb-2" style={{ fontWeight: 400 }}>
-                  {s.created_at || '—'}
-                </div>
-                <div className="text-xl text-white mb-3" style={{ fontWeight: 350 }}>
-                  Unwound for{' '}
-                  <span style={{ fontWeight: 500 }}>{fmtDuration(s.duration_seconds)}</span>
+                <div className="flex items-center justify-between mb-1.5">
+                  <span className="text-xs text-slate-400/80" style={{ fontWeight: 400 }}>
+                    {s.created_at || '—'}
+                  </span>
+                  <span className="text-base text-white" style={{ fontWeight: 600 }}>
+                    {fmtDuration(s.duration_seconds)}
+                  </span>
                 </div>
                 <div className="flex items-center justify-between text-sm">
-                  <span className={pickupColor} style={{ fontWeight: 350 }}>
+                  <span className={pickupColor} style={{ fontWeight: 400 }}>
                     {pickups === 0 ? 'No pickups ✓' : `${pickups} pickup${pickups !== 1 ? 's' : ''}`}
                   </span>
                   {s.alarm_time && (
-                    <span className="text-amber-400/50" style={{ fontWeight: 350 }}>
+                    <span className="text-slate-400/80" style={{ fontWeight: 400 }}>
                       Bedtime {fmt12h(s.alarm_time)}
                     </span>
                   )}
@@ -162,10 +163,10 @@ export function StatsScreen({ sendCmd }: Props) {
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
               onClick={(e) => e.stopPropagation()}
-              className="bg-gradient-to-b from-red-950/95 to-slate-950/95 rounded-3xl p-7 w-full border border-red-800/30"
+              className="bg-gradient-to-b from-red-950/95 to-slate-950/95 rounded-3xl p-7 w-full max-w-sm border border-red-800/30"
             >
               <h2 className="text-xl text-white mb-2" style={{ fontWeight: 400 }}>Reset everything?</h2>
-              <p className="text-red-200/60 text-sm mb-6" style={{ fontWeight: 350 }}>
+              <p className="text-red-200/75 text-sm mb-6" style={{ fontWeight: 400 }}>
                 This will erase all {sessions.length} session{sessions.length !== 1 ? 's' : ''}, clear your schedule, and restart onboarding. This cannot be undone.
               </p>
               <div className="space-y-3">

@@ -16,6 +16,21 @@ from fastapi.staticfiles import StaticFiles
 
 IS_PI = platform.machine().lower().startswith(("arm", "aarch"))
 
+# spidev is only available on Linux / Raspberry Pi
+try:
+    import spidev as _spidev_mod
+    SPI_AVAILABLE = True
+except ImportError:
+    SPI_AVAILABLE = False
+
+# ── Force sensor config ───────────────────────────────────────────────────────
+SPI_BUS         = 0       # SPI bus (BCM: SPI0)
+SPI_DEVICE      = 0       # CE0
+SPI_ADC_CHANNEL = 0       # MCP3008 channel connected to FSR voltage divider
+SPI_SPEED_HZ    = 1_350_000
+DOCK_THRESHOLD  = 200     # ADC units (0–1023); above = phone present on dock
+DEBOUNCE_COUNT  = 3       # consecutive matching readings before firing an event
+
 BASE_DIR   = Path(__file__).parent.parent
 PREFS_FILE = BASE_DIR / "prefs.json"
 DB_FILE    = BASE_DIR / "user_device_data.db"
@@ -403,6 +418,71 @@ async def schedule_ticker():
             await manager.broadcast(state.to_client_state())
 
 
+# ── Force sensor (SPI / MCP3008) ─────────────────────────────────────────────
+
+def _read_mcp3008(spi, channel: int) -> int:
+    """Read a 10-bit value (0–1023) from an MCP3008 ADC over SPI."""
+    r = spi.xfer2([1, (8 + channel) << 4, 0])
+    return ((r[1] & 3) << 8) + r[2]
+
+
+async def force_sensor_task():
+    """
+    Poll the FSR via SPI and fire pickup / dock events.
+    Silently exits on non-Pi systems or if the SPI device can't be opened.
+    """
+    if not SPI_AVAILABLE:
+        print("[SPI] spidev not available — force sensor disabled")
+        return
+
+    spi = None
+    try:
+        import spidev
+        spi = spidev.SpiDev()
+        spi.open(SPI_BUS, SPI_DEVICE)
+        spi.max_speed_hz = SPI_SPEED_HZ
+        spi.mode = 0
+        print(f"[SPI] force sensor ready — bus {SPI_BUS} dev {SPI_DEVICE} ch {SPI_ADC_CHANNEL}")
+    except Exception as e:
+        print(f"[SPI] cannot open SPI device: {e}")
+        return
+
+    high_run = 0  # consecutive readings above threshold
+    low_run  = 0  # consecutive readings below threshold
+
+    try:
+        while True:
+            await asyncio.sleep(0.1)
+
+            try:
+                value = _read_mcp3008(spi, SPI_ADC_CHANNEL)
+            except Exception as e:
+                print(f"[SPI] read error: {e}")
+                continue
+
+            is_docked = state.session.get("is_phone_docked", True)
+
+            if value >= DOCK_THRESHOLD:
+                high_run += 1
+                low_run = 0
+                # Phone placed back on dock during an active session
+                if high_run == DEBOUNCE_COUNT and not is_docked:
+                    state.dock_phone()
+                    await manager.broadcast(state.to_client_state())
+            else:
+                low_run += 1
+                high_run = 0
+                # Phone lifted from dock during an active session
+                if low_run == DEBOUNCE_COUNT and is_docked and state.session["is_running"]:
+                    state.pickup_phone()
+                    await manager.broadcast(state.to_client_state())
+    finally:
+        try:
+            spi.close()
+        except Exception:
+            pass
+
+
 # ── App lifespan ──────────────────────────────────────────────────────────────
 
 @asynccontextmanager
@@ -410,8 +490,10 @@ async def lifespan(app: FastAPI):
     _build_db()
     state.setup_mqtt()
     ticker = asyncio.create_task(schedule_ticker())
+    sensor = asyncio.create_task(force_sensor_task())
     yield
     ticker.cancel()
+    sensor.cancel()
     if state._mqtt:
         try:
             state._mqtt.loop_stop()
