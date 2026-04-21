@@ -11,3 +11,6 @@ openai==2.15.0
 
 # Optional: legacy Kivy UI (no longer the primary interface)
 # kivy==2.3.0
+
+# Spidev only for Raspberry Pi
+# spidev==3.8.0
