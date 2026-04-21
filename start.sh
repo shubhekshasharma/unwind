@@ -28,19 +28,23 @@ BACKEND_PID=$!
 sleep 2
 
 # Launch browser in kiosk mode
-if command -v chromium &>/dev/null; then
-  # Raspberry Pi OS
-  chromium \
+if command -v chromium-browser &>/dev/null; then
+  chromium-browser \
     --kiosk \
     --noerrdialogs \
     --disable-infobars \
     --disable-restore-session-state \
+    --disk-cache-size=1 \
+    --incognito \
     --app=http://localhost:8000 &
 elif command -v chromium &>/dev/null; then
   chromium \
     --kiosk \
     --noerrdialogs \
     --disable-infobars \
+    --disable-restore-session-state \
+    --disk-cache-size=1 \
+    --incognito \
     --app=http://localhost:8000 &
 elif command -v open &>/dev/null; then
   # macOS — open in default browser for dev

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, useCallback } from 'react'
+import React, { useEffect, useRef, useState, useCallback } from 'react'
 import { OnboardingScreen } from './components/OnboardingScreen'
 import { HomeScreen } from './components/HomeScreen'
 import { ReminderScreen } from './components/ReminderScreen'
@@ -61,11 +61,38 @@ const DEFAULT_STATE: AppState = {
 
 export type SendCmd = (payload: Record<string, unknown>) => void
 
+function fadeVolume(
+  audio: HTMLAudioElement,
+  fadeRef: React.MutableRefObject<ReturnType<typeof setInterval> | null>,
+  target: number,
+  durationMs: number,
+  onDone?: () => void,
+) {
+  if (fadeRef.current) clearInterval(fadeRef.current)
+  const STEPS = 30
+  const stepMs = durationMs / STEPS
+  const start = audio.volume
+  const delta = (target - start) / STEPS
+  let step = 0
+  fadeRef.current = setInterval(() => {
+    step++
+    audio.volume = Math.max(0, Math.min(1, start + delta * step))
+    if (step >= STEPS) {
+      clearInterval(fadeRef.current!)
+      fadeRef.current = null
+      onDone?.()
+    }
+  }, stepMs)
+}
+
 export default function App() {
   const [appState, setAppState] = useState<AppState>(DEFAULT_STATE)
   const [connected, setConnected] = useState(false)
   const wsRef = useRef<WebSocket | null>(null)
   const reconnectTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const audioRef = useRef<HTMLAudioElement | null>(null)
+  const fadeRef = useRef<ReturnType<typeof setInterval> | null>(null)
+  const prevScreenRef = useRef<Screen>('onboarding')
 
   const connect = useCallback(() => {
     const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:'
@@ -105,9 +132,54 @@ export default function App() {
     }
   }, [connect])
 
+  useEffect(() => {
+    const audio = new Audio('/calming.mp3')
+    audio.loop = true
+    audio.volume = 0
+    audio.onerror = () => {
+      if (fadeRef.current) { clearInterval(fadeRef.current); fadeRef.current = null }
+      audioRef.current = null
+    }
+    audioRef.current = audio
+    return () => {
+      if (fadeRef.current) { clearInterval(fadeRef.current); fadeRef.current = null }
+      audio.onerror = null
+      audio.pause()
+      audioRef.current = null
+    }
+  }, [])
+
+  useEffect(() => {
+    const audio = audioRef.current
+    if (!audio) return
+    const prev = prevScreenRef.current
+    prevScreenRef.current = appState.screen
+
+    if (appState.screen === 'session') {
+      audio.play().catch(() => {})
+      fadeVolume(audio, fadeRef, 0.65, 2000)
+    } else if (appState.screen === 'paused') {
+      fadeVolume(audio, fadeRef, 0, 1500, () => audio.pause())
+    } else if (prev === 'session' || prev === 'paused') {
+      fadeVolume(audio, fadeRef, 0, 3000, () => {
+        audio.pause()
+        audio.currentTime = 0
+      })
+    }
+  }, [appState.screen])
+
   const sendCmd: SendCmd = useCallback((payload) => {
     if (wsRef.current?.readyState === WebSocket.OPEN) {
       wsRef.current.send(JSON.stringify(payload))
+    }
+    // Prime audio within the user gesture so autoplay is allowed
+    if (payload.cmd === 'start_session') {
+      const audio = audioRef.current
+      if (audio) {
+        audio.currentTime = 0
+        audio.volume = 0
+        audio.play().catch(() => {})
+      }
     }
   }, [])
 
