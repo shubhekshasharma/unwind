@@ -555,7 +555,7 @@ async def websocket_endpoint(ws: WebSocket):
 
             elif cmd == "navigate":
                 target = data.get("screen", "home")
-                if target in ("home", "stats"):
+                if target in ("home", "stats", "reminderPulse"):
                     state.screen = target
 
             elif cmd == "reset":

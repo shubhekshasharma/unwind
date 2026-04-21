@@ -130,6 +130,21 @@ export function ActiveSessionScreen({ prefs, session, sendCmd }: Props) {
           </AnimatePresence>
         </div>
 
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 1 }}
+          className="w-full flex justify-center pb-2"
+        >
+          <button
+            onClick={() => setShowEnd(true)}
+            className="py-2.5 px-6 text-sm text-orange-300/45 hover:text-orange-200/70 transition-colors"
+            style={{ fontWeight: 400 }}
+          >
+            End ritual
+          </button>
+        </motion.div>
+
       </div>
 
       {/* Debug menu — bottom right */}
