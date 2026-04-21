@@ -31,6 +31,11 @@ sleep 2
 pkill -f "chromium.*localhost:8000" 2>/dev/null || true
 sleep 1
 
+# Detect physical screen resolution (Pi only)
+SCREEN_RES=$(DISPLAY=:0 xdpyinfo 2>/dev/null | awk '/dimensions/{print $2}' || echo "800x480")
+SCREEN_W=$(echo "$SCREEN_RES" | cut -dx -f1)
+SCREEN_H=$(echo "$SCREEN_RES" | cut -dx -f2)
+
 # Launch browser in kiosk mode
 if command -v chromium &>/dev/null; then
   chromium \
@@ -39,6 +44,11 @@ if command -v chromium &>/dev/null; then
     --disable-infobars \
     --disable-restore-session-state \
     --disk-cache-size=1 \
+    --force-device-scale-factor=1 \
+    --window-size="${SCREEN_W},${SCREEN_H}" \
+    --touch-events=enabled \
+    --overscroll-history-navigation=0 \
+    --hide-scrollbars \
     --app=http://localhost:8000 &
 elif command -v open &>/dev/null; then
   # macOS — open in default browser for dev
