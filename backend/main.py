@@ -28,7 +28,7 @@ SPI_BUS         = 0       # SPI bus (BCM: SPI0)
 SPI_DEVICE      = 0       # CE0
 SPI_ADC_CHANNEL = 0       # MCP3008 channel connected to FSR voltage divider
 SPI_SPEED_HZ    = 1_350_000
-DOCK_THRESHOLD  = 200     # ADC units (0–1023); above = phone present on dock
+DOCK_THRESHOLD  = 8       # ADC units (0–1023); BELOW = phone present (sensor reads ~0 under pressure, 12-15 at rest)
 DEBOUNCE_COUNT  = 3       # consecutive matching readings before firing an event
 
 BASE_DIR   = Path(__file__).parent.parent
@@ -464,7 +464,7 @@ async def force_sensor_task():
 
             is_docked = state.session.get("is_phone_docked", True)
 
-            if value >= DOCK_THRESHOLD:
+            if value < DOCK_THRESHOLD:
                 high_run += 1
                 low_run = 0
                 if high_run == DEBOUNCE_COUNT and not is_docked:
