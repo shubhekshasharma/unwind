@@ -14,6 +14,8 @@ from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
+from sound import sounds
+
 IS_PI = platform.machine().lower().startswith(("arm", "aarch"))
 
 # spidev is only available on Linux / Raspberry Pi
@@ -376,6 +378,7 @@ manager = ConnectionManager()
 async def schedule_ticker():
     """Pushes state to clients every second during active screens; checks schedule every 30s."""
     last_check = 0.0
+    prev_screen = state.screen
 
     while True:
         await asyncio.sleep(1)
@@ -391,6 +394,7 @@ async def schedule_ticker():
             if not state.session["is_paused"] and state.is_bedtime_passed():
                 state.stop_session()
                 state.screen = "complete"
+                sounds.fade_out_ambient(10.0)
             changed = True
 
         # Schedule check every 30 s
@@ -415,6 +419,18 @@ async def schedule_ticker():
                 else:
                     if state._warned_5min and (secs_unwind is None or secs_unwind > 300):
                         state._warned_5min = False
+
+        # Sound triggers on screen transitions
+        if state.screen != prev_screen:
+            if state.screen == "reminder":
+                sounds.play_once("chime_5min")
+            elif state.screen == "reminderPulse":
+                sounds.play_once("chime_bedtime")
+                sounds.start_dock_loop()
+            elif state.screen in ("home", "onboarding", "stats"):
+                # Navigated away from reminder — silence dock loop
+                sounds.stop_dock_loop()
+            prev_screen = state.screen
 
         if changed:
             await manager.broadcast(state.to_client_state())
@@ -470,8 +486,12 @@ async def force_sensor_task():
                 if high_run == DEBOUNCE_COUNT and not is_docked:
                     if state.session["is_running"]:
                         state.dock_phone()
+                        sounds.play_once("dock_confirmed")
+                        sounds.resume_ambient()
                     else:
                         state.session["is_phone_docked"] = True
+                        sounds.stop_dock_loop()
+                        sounds.play_once("dock_confirmed")
                     await manager.broadcast(state.to_client_state())
             else:
                 low_run += 1
@@ -479,6 +499,8 @@ async def force_sensor_task():
                 if low_run == DEBOUNCE_COUNT and is_docked:
                     if state.session["is_running"]:
                         state.pickup_phone()
+                        sounds.play_once("pickup")
+                        sounds.pause_ambient()
                     else:
                         state.session["is_phone_docked"] = False
                     await manager.broadcast(state.to_client_state())
@@ -540,20 +562,30 @@ async def websocket_endpoint(ws: WebSocket):
             elif cmd == "start_session":
                 state.start_session()
                 state.screen = "session"
+                sounds.stop_dock_loop()
+                sounds.play_once("dock_confirmed")
+                sounds.start_ambient()
 
             elif cmd == "stop_session":
                 elapsed = state.get_elapsed()
                 state.stop_session()
                 state.session["_last_elapsed"] = elapsed  # carry into complete screen
                 state.screen = "complete"
+                sounds.stop_ambient()
+                sounds.play_once("complete")
 
             elif cmd == "pickup":
                 state.pickup_phone()
+                sounds.play_once("pickup")
+                sounds.pause_ambient()
 
             elif cmd == "dock":
                 state.dock_phone()
+                sounds.play_once("dock_confirmed")
+                sounds.resume_ambient()
 
             elif cmd == "skip":
+                sounds.stop_dock_loop()
                 state.screen = "home"
 
             elif cmd == "continue_session":
@@ -565,6 +597,8 @@ async def websocket_endpoint(ws: WebSocket):
                     state.screen = target
 
             elif cmd == "reset":
+                sounds.stop_dock_loop()
+                sounds.stop_ambient()
                 # Stop any running session cleanly
                 if state.session["is_running"]:
                     state.stop_session()
