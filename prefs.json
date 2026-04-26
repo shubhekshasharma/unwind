@@ -1,6 +1,6 @@
 {
-  "wake_time": "01:00",
-  "bedtime": "19:30",
+  "wake_time": "20:00",
+  "bedtime": "16:30",
   "unwind_duration": 30,
   "onboarding_complete": true
 }

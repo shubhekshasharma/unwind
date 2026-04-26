@@ -167,6 +167,7 @@ class SoundManager:
         self._ambient_offset: float = 0.0
         self._ambient_tmp: Optional[str] = None   # macOS temp file path
         self._fade_proc: Optional[subprocess.Popen] = None
+        self._oneshots: list[subprocess.Popen] = []
 
     # ── internal helpers ──────────────────────────────────────────────────────
 
@@ -197,6 +198,19 @@ class SoundManager:
 
     # ── one-shot sounds ───────────────────────────────────────────────────────
 
+    def stop_all_oneshots(self) -> None:
+        """Kill every currently-playing one-shot sound immediately."""
+        active = [p for p in self._oneshots if p.poll() is None]
+        for p in active:
+            self._kill(p)
+        self._oneshots = []
+
+    def stop_all(self) -> None:
+        """Stop everything — call on any state transition to a quiet screen."""
+        self.stop_dock_loop()
+        self.stop_all_oneshots()
+        self.stop_ambient()
+
     def play_once(self, key: str) -> None:
         p = self._resolve(key)
         if p is None:
@@ -205,7 +219,10 @@ class SoundManager:
             cmd = [_APLAY, "-D", APLAY_DEVICE, str(p)]
         else:
             cmd = [_AFPLAY, str(p)]
-        subprocess.Popen(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        proc = subprocess.Popen(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        # Prune finished procs and track this one
+        self._oneshots = [p for p in self._oneshots if p.poll() is None]
+        self._oneshots.append(proc)
 
     # ── dock waiting loop ─────────────────────────────────────────────────────
 
@@ -226,6 +243,7 @@ class SoundManager:
         if self._dock_task and not self._dock_task.done():
             self._dock_task.cancel()
         self._dock_task = None
+        self.stop_all_oneshots()
 
     # ── ambient soundscape ────────────────────────────────────────────────────
 

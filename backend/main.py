@@ -62,6 +62,7 @@ class AppState:
         self.session = self._blank_session()
         self.screen: str = "home" if self.prefs.get("onboarding_complete") else "onboarding"
         self._warned_5min = False
+        self._session_done_tonight: bool = False
         self._mqtt: Optional[mqtt.Client] = None
 
     # Prefs
@@ -82,7 +83,7 @@ class AppState:
 
     def _blank_session(self) -> dict:
         return dict(
-            is_phone_docked=True,
+            is_phone_docked=False,
             timer_start=None,
             is_running=False,
             is_paused=False,
@@ -257,7 +258,7 @@ class AppState:
             "screen": self.screen,
             "session": {
                 "timeRemaining": max(0.0, secs_left) if secs_left is not None else 0.0,
-                "elapsed": self.get_elapsed(),
+                "elapsed": self.session.get("_last_elapsed") or self.get_elapsed(),
                 "pickupCount": s["pickup_count"],
                 "isPhoneDocked": s["is_phone_docked"],
                 "isRunning": s["is_running"],
@@ -392,8 +393,11 @@ async def schedule_ticker():
         # Push countdown updates every second while session is active or paused
         if state.session["is_running"] and state.screen in ("session", "paused"):
             if not state.session["is_paused"] and state.is_bedtime_passed():
+                elapsed = state.get_elapsed()
                 state.stop_session()
+                state.session["_last_elapsed"] = elapsed
                 state.screen = "complete"
+                state._session_done_tonight = True
                 sounds.fade_out_ambient(10.0)
             changed = True
 
@@ -402,14 +406,20 @@ async def schedule_ticker():
             last_check = now
             if (
                 state.prefs.get("onboarding_complete")
+                and not state._session_done_tonight
                 and state.screen not in ("session", "paused", "incomplete", "complete", "onboarding")
             ):
                 secs_unwind = state.secs_to_unwind()
                 secs_bed    = state.secs_to_bedtime()
 
+                # Reset done-tonight once we're well past bedtime (new day cycle)
+                if secs_unwind is not None and secs_unwind > 3600:
+                    state._session_done_tonight = False
+
                 if secs_unwind is not None and secs_unwind <= 0 and (secs_bed is None or secs_bed > 0):
                     if state.screen != "reminderPulse":
                         state.screen = "reminderPulse"
+                        state.session["is_phone_docked"] = False  # require fresh dock each night
                         changed = True
                 elif secs_unwind is not None and secs_unwind <= 300:
                     if state.screen == "home" and not state._warned_5min:
@@ -423,13 +433,21 @@ async def schedule_ticker():
         # Sound triggers on screen transitions
         if state.screen != prev_screen:
             if state.screen == "reminder":
+                sounds.stop_all_oneshots()
                 sounds.play_once("chime_5min")
             elif state.screen == "reminderPulse":
+                sounds.stop_all_oneshots()
                 sounds.play_once("chime_bedtime")
                 sounds.start_dock_loop()
-            elif state.screen in ("home", "onboarding", "stats"):
-                # Navigated away from reminder — silence dock loop
-                sounds.stop_dock_loop()
+            elif state.screen in ("session", "paused"):
+                # Active session screens — do not interrupt ambient
+                pass
+            elif state.screen == "complete":
+                # fade_out_ambient already triggered at the call site
+                pass
+            else:
+                # home, stats, incomplete, onboarding — silence everything
+                sounds.stop_all()
             prev_screen = state.screen
 
         if changed:
@@ -486,11 +504,12 @@ async def force_sensor_task():
                 if high_run == DEBOUNCE_COUNT and not is_docked:
                     if state.session["is_running"]:
                         state.dock_phone()
+                        sounds.stop_all_oneshots()
                         sounds.play_once("dock_confirmed")
                         sounds.resume_ambient()
                     else:
                         state.session["is_phone_docked"] = True
-                        sounds.stop_dock_loop()
+                        sounds.stop_all()
                         sounds.play_once("dock_confirmed")
                     await manager.broadcast(state.to_client_state())
             else:
@@ -499,6 +518,7 @@ async def force_sensor_task():
                 if low_run == DEBOUNCE_COUNT and is_docked:
                     if state.session["is_running"]:
                         state.pickup_phone()
+                        sounds.stop_all_oneshots()
                         sounds.play_once("pickup")
                         sounds.pause_ambient()
                     else:
@@ -558,34 +578,45 @@ async def websocket_endpoint(ws: WebSocket):
                 state.save_prefs()
                 state.screen = "home"
                 state._warned_5min = False
+                state._session_done_tonight = False
 
             elif cmd == "start_session":
                 state.start_session()
                 state.screen = "session"
-                sounds.stop_dock_loop()
-                sounds.play_once("dock_confirmed")
+                sounds.stop_all()
                 sounds.start_ambient()
 
             elif cmd == "stop_session":
                 elapsed = state.get_elapsed()
                 state.stop_session()
-                state.session["_last_elapsed"] = elapsed  # carry into complete screen
+                state.session["_last_elapsed"] = elapsed
                 state.screen = "complete"
-                sounds.stop_ambient()
+                state._session_done_tonight = True
+                sounds.stop_all()
                 sounds.play_once("complete")
 
             elif cmd == "pickup":
-                state.pickup_phone()
-                sounds.play_once("pickup")
-                sounds.pause_ambient()
+                if state.session["is_running"]:
+                    state.pickup_phone()
+                    sounds.stop_all_oneshots()
+                    sounds.play_once("pickup")
+                    sounds.pause_ambient()
+                else:
+                    state.session["is_phone_docked"] = False
 
             elif cmd == "dock":
-                state.dock_phone()
-                sounds.play_once("dock_confirmed")
-                sounds.resume_ambient()
+                if state.session["is_running"]:
+                    state.dock_phone()
+                    sounds.stop_all_oneshots()
+                    sounds.play_once("dock_confirmed")
+                    sounds.resume_ambient()
+                else:
+                    state.session["is_phone_docked"] = True
+                    sounds.stop_all_oneshots()
+                    sounds.play_once("dock_confirmed")
 
             elif cmd == "skip":
-                sounds.stop_dock_loop()
+                sounds.stop_all()
                 state.screen = "home"
 
             elif cmd == "continue_session":
@@ -594,6 +625,7 @@ async def websocket_endpoint(ws: WebSocket):
             elif cmd == "navigate":
                 target = data.get("screen", "home")
                 if target in ("home", "stats"):
+                    sounds.stop_all()
                     state.screen = target
 
             elif cmd == "reset":
