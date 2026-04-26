@@ -21,7 +21,7 @@ from pathlib import Path
 from typing import Optional
 
 SOUNDS_DIR = Path(__file__).parent.parent / "assets" / "sounds"
-APLAY_DEVICE = "hw:3,0"
+APLAY_DEVICE = "plughw:3,0"
 
 _APLAY   = shutil.which("aplay")    # Linux / Pi
 _AFPLAY  = shutil.which("afplay")   # macOS
