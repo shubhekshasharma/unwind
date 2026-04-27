@@ -1,5 +1,5 @@
 import { motion } from 'motion/react'
-import { Moon, Sun, Sparkles, CheckCircle2 } from 'lucide-react'
+import { Sun, Sparkles, CheckCircle2 } from 'lucide-react'
 import type { Prefs, SessionState, SendCmd } from '../App'
 
 type Props = { prefs: Prefs; session: SessionState; sendCmd: SendCmd }
@@ -64,9 +64,9 @@ export function CompletionScreen({ prefs, session, sendCmd }: Props) {
             transition={{ delay: 0.3 }}
             className="text-center space-y-2"
           >
-            <h1 className="text-3xl text-white" style={{ fontWeight: 400 }}>Ritual complete</h1>
+            <h1 className="text-3xl text-white" style={{ fontWeight: 500 }}>Well done</h1>
             <p className="text-orange-200/80 text-base max-w-xs" style={{ fontWeight: 400 }}>
-              You've taken time to unwind. Your mind is ready for restful sleep.
+              You've taken time to unwind. You're ready for rest.
             </p>
           </motion.div>
 
@@ -111,15 +111,6 @@ export function CompletionScreen({ prefs, session, sendCmd }: Props) {
             </div>
           </motion.div>
 
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.8 }}
-            className="text-center space-y-1"
-          >
-            <Moon className="w-8 h-8 text-orange-400/40 mx-auto" />
-            <p className="text-orange-200/60 text-sm" style={{ fontWeight: 400 }}>Sweet dreams</p>
-          </motion.div>
         </div>
 
         <motion.div
@@ -129,18 +120,18 @@ export function CompletionScreen({ prefs, session, sendCmd }: Props) {
           className="w-full max-w-xs space-y-2.5"
         >
           <button
-            onClick={() => sendCmd({ cmd: 'navigate', screen: 'stats' })}
-            className="w-full py-3.5 rounded-2xl bg-orange-950/25 border border-orange-800/20 text-orange-300/80 hover:text-orange-200 transition-colors text-base"
-            style={{ fontWeight: 400 }}
+            onClick={() => sendCmd({ cmd: 'navigate', screen: 'home' })}
+            className="w-full py-3.5 rounded-2xl bg-orange-700/80 hover:bg-orange-700 text-orange-50 transition-colors text-base"
+            style={{ fontWeight: 500 }}
           >
-            View sleep history
+            Sleep well
           </button>
           <button
-            onClick={() => sendCmd({ cmd: 'navigate', screen: 'home' })}
+            onClick={() => sendCmd({ cmd: 'navigate', screen: 'stats' })}
             className="w-full py-2.5 text-orange-300/55 hover:text-orange-200/80 transition-colors text-sm"
-            style={{ fontWeight: 400 }}
+            style={{ fontWeight: 500 }}
           >
-            Back to home
+            View sleep history
           </button>
         </motion.div>
       </div>

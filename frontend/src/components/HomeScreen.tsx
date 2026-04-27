@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
-import { Settings as SettingsIcon, Edit3, RotateCcw } from 'lucide-react'
+import { Settings as SettingsIcon, RotateCcw, History } from 'lucide-react'
 import { UnwindLogo } from './UnwindLogo'
 import type { Prefs, SessionState, SendCmd } from '../App'
 
@@ -18,6 +18,16 @@ function fmt12h(t: string): string {
   }
 }
 
+function unwindStartTime(bedtime: string, duration: number): string {
+  try {
+    const [h, m] = bedtime.split(':').map(Number)
+    const total = ((h * 60 + m - duration) % 1440 + 1440) % 1440
+    const sh = Math.floor(total / 60)
+    const sm = total % 60
+    return fmt12h(`${String(sh).padStart(2, '0')}:${String(sm).padStart(2, '0')}`)
+  } catch { return '' }
+}
+
 export function HomeScreen({ prefs, sendCmd }: Props) {
   const [showSettings, setShowSettings] = useState(false)
   const [showResetConfirm, setShowResetConfirm] = useState(false)
@@ -29,7 +39,6 @@ export function HomeScreen({ prefs, sendCmd }: Props) {
     return () => clearInterval(t)
   }, [])
 
-  // Reset edit state when modal opens
   const openSettings = () => {
     setEdit({ ...prefs })
     setShowSettings(true)
@@ -54,117 +63,108 @@ export function HomeScreen({ prefs, sendCmd }: Props) {
     hour12: true,
   })
 
-  const dayProgress = ((now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds()) / 86400) * 628
-
   return (
     <div className="size-full relative overflow-hidden bg-slate-950">
       <motion.div
-        className="absolute inset-0"
+        className="absolute inset-0 pointer-events-none"
         animate={{
           background: [
-            'radial-gradient(circle at 50% 30%, rgba(251,146,60,0.07) 0%, transparent 60%)',
-            'radial-gradient(circle at 50% 35%, rgba(245,158,11,0.09) 0%, transparent 60%)',
-            'radial-gradient(circle at 50% 30%, rgba(251,146,60,0.07) 0%, transparent 60%)',
+            'radial-gradient(circle at 50% 35%, rgba(251,146,60,0.07) 0%, transparent 55%)',
+            'radial-gradient(circle at 50% 40%, rgba(245,158,11,0.09) 0%, transparent 55%)',
+            'radial-gradient(circle at 50% 35%, rgba(251,146,60,0.07) 0%, transparent 55%)',
           ],
         }}
         transition={{ duration: 10, repeat: Infinity }}
       />
 
-      <div className="relative size-full flex flex-col p-5">
+      <div className="relative size-full flex flex-col">
         {/* Header */}
-        <div className="flex items-center justify-between mb-5">
-          <div className="flex items-center gap-3">
-            <UnwindLogo size={36} animate />
-            <span className="text-base leading-none text-orange-300/90 tracking-wide" style={{ fontWeight: 500 }}>Unwind</span>
+        <div className="relative z-10 flex items-center justify-between px-6 pt-5">
+          <div className="flex items-center gap-2.5">
+            <UnwindLogo size={28} animate />
+            <span className="text-sm text-orange-300/80 tracking-wide" style={{ fontWeight: 500 }}>Unwind</span>
           </div>
-          <button
-            onClick={openSettings}
-            className="p-2.5 rounded-full hover:bg-orange-900/20 transition-colors"
-          >
-            <SettingsIcon className="w-6 h-6 text-orange-400/75" />
-          </button>
-        </div>
-
-        {/* Clock */}
-        <div className="flex-1 flex flex-col items-center justify-center -mt-2">
-          {/* Container sized to the ring so text stays inside it */}
-          <div className="relative w-64 h-64 mx-auto mb-5 flex items-center justify-center">
-            <svg
-              viewBox="0 0 208 208"
-              className="absolute inset-0 w-full h-full -rotate-90"
-              style={{ filter: 'blur(0.3px)' }}
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => sendCmd({ cmd: 'navigate', screen: 'stats' })}
+              className="w-10 h-10 rounded-full bg-orange-950/35 flex items-center justify-center hover:bg-orange-950/55 transition-colors"
             >
-              <circle cx="104" cy="104" r="100" stroke="rgba(251,146,60,0.10)" strokeWidth="2.5" fill="none" />
-              <motion.circle
-                cx="104" cy="104" r="100"
-                stroke="url(#tg)" strokeWidth="2.5" fill="none"
-                strokeDasharray={628}
-                strokeDashoffset={628 - dayProgress}
-                strokeLinecap="round"
-              />
-              <defs>
-                <linearGradient id="tg" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stopColor="rgba(251,146,60,0.50)" />
-                  <stop offset="100%" stopColor="rgba(245,158,11,0.70)" />
-                </linearGradient>
-              </defs>
-            </svg>
-
-            <motion.div
-              animate={{ opacity: [0.95, 1, 0.95] }}
-              transition={{ duration: 3, repeat: Infinity }}
-              className="text-center relative z-10"
-            >
-              <div
-                className="text-5xl leading-none text-white tracking-tight tabular-nums"
-                style={{ fontWeight: 300 }}
-              >
-                {timeStr}
-              </div>
-              <div className="text-sm text-orange-300/65 mt-3 tracking-wide" style={{ fontWeight: 400 }}>
-                {now.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
-              </div>
-            </motion.div>
-          </div>
-        </div>
-
-        {/* Schedule cards */}
-        <div className="space-y-3">
-          <div className="flex items-center justify-between px-1">
-            <span className="text-sm tracking-widest uppercase text-orange-400/65" style={{ fontWeight: 600 }}>
-              Schedule
-            </span>
+              <History className="w-5 h-5 text-orange-400/80" />
+            </button>
             <button
               onClick={openSettings}
-              className="flex items-center gap-1.5 text-sm text-orange-400/70 hover:text-orange-300 transition-colors px-2 py-1"
+              className="w-10 h-10 rounded-full bg-orange-950/35 flex items-center justify-center hover:bg-orange-950/55 transition-colors"
             >
-              <Edit3 className="w-4 h-4" /> Edit
+              <SettingsIcon className="w-5 h-5 text-orange-400/80" />
             </button>
           </div>
-
-          <div className="grid grid-cols-3 gap-2.5">
-            <div className="bg-gradient-to-br from-orange-950/30 to-orange-900/20 border border-orange-800/25 rounded-xl p-4 backdrop-blur-sm">
-              <div className="text-xs tracking-wider uppercase text-orange-400/70 mb-2" style={{ fontWeight: 600 }}>Bedtime</div>
-              <div className="text-lg text-orange-100 tabular-nums" style={{ fontWeight: 500 }}>{fmt12h(prefs.bedtime)}</div>
-            </div>
-            <div className="bg-gradient-to-br from-amber-950/30 to-amber-900/20 border border-amber-800/25 rounded-xl p-4 backdrop-blur-sm">
-              <div className="text-xs tracking-wider uppercase text-amber-400/70 mb-2" style={{ fontWeight: 600 }}>Wake</div>
-              <div className="text-lg text-amber-100 tabular-nums" style={{ fontWeight: 500 }}>{fmt12h(prefs.wakeTime)}</div>
-            </div>
-            <div className="bg-gradient-to-br from-rose-950/30 to-rose-900/20 border border-rose-800/25 rounded-xl p-4 backdrop-blur-sm">
-              <div className="text-xs tracking-wider uppercase text-rose-400/70 mb-2" style={{ fontWeight: 600 }}>Ritual</div>
-              <div className="text-lg text-rose-100" style={{ fontWeight: 500 }}>{prefs.unwindDuration}m</div>
-            </div>
-          </div>
-
-          <button
-            onClick={() => sendCmd({ cmd: 'navigate', screen: 'stats' })}
-            className="w-full py-3 rounded-2xl bg-orange-950/20 border border-orange-800/15 text-orange-300/70 hover:text-orange-200 hover:bg-orange-950/30 transition-colors text-sm mt-1"
-            style={{ fontWeight: 400 }}
-          >
-            View sleep history
-          </button>
         </div>
+
+        {/* Clock + schedule — centered */}
+        <div className="flex-1 flex flex-col items-center justify-center -mt-8">
+          <motion.div
+            animate={{ opacity: [0.95, 1, 0.95] }}
+            transition={{ duration: 4, repeat: Infinity }}
+            className="text-center"
+          >
+            <div
+              className="text-7xl leading-none text-white tabular-nums mb-2"
+              style={{ fontFamily: '"DM Sans", sans-serif', fontWeight: 300, letterSpacing: '-0.02em' }}
+            >
+              {timeStr}
+            </div>
+            <div className="text-base text-white/60 tracking-wide mb-2" style={{ fontWeight: 400 }}>
+              {now.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
+            </div>
+            <div className="text-sm text-orange-400/70 tracking-wide mb-10 mt-3" style={{ fontWeight: 400 }}>
+              Unwind begins at {unwindStartTime(prefs.bedtime, prefs.unwindDuration)}
+            </div>
+          </motion.div>
+
+          {/* Schedule row */}
+          <div className="flex items-center gap-6 text-orange-300/40">
+            <button
+              onClick={openSettings}
+              className="flex flex-col items-center gap-1.5 hover:text-orange-300/70 transition-colors group min-w-[80px] py-2"
+            >
+              <div className="text-xs tracking-wide text-orange-400/50 group-hover:text-orange-400/80 transition-colors" style={{ fontWeight: 600 }}>
+                BEDTIME
+              </div>
+              <div className="text-xl text-orange-200/70 group-hover:text-orange-200 transition-colors" style={{ fontWeight: 400 }}>
+                {fmt12h(prefs.bedtime)}
+              </div>
+            </button>
+
+            <div className="w-px h-10 bg-orange-800/20" />
+
+            <button
+              onClick={openSettings}
+              className="flex flex-col items-center gap-1.5 hover:text-orange-300/70 transition-colors group min-w-[80px] py-2"
+            >
+              <div className="text-xs tracking-wide text-amber-400/50 group-hover:text-amber-400/80 transition-colors" style={{ fontWeight: 600 }}>
+                WAKE UP
+              </div>
+              <div className="text-xl text-amber-200/70 group-hover:text-amber-200 transition-colors" style={{ fontWeight: 400 }}>
+                {fmt12h(prefs.wakeTime)}
+              </div>
+            </button>
+
+            <div className="w-px h-10 bg-orange-800/20" />
+
+            <button
+              onClick={openSettings}
+              className="flex flex-col items-center gap-1.5 hover:text-orange-300/70 transition-colors group min-w-[80px] py-2"
+            >
+              <div className="text-xs tracking-wide text-rose-400/50 group-hover:text-rose-400/80 transition-colors" style={{ fontWeight: 600 }}>
+                RITUAL
+              </div>
+              <div className="text-xl text-rose-200/70 group-hover:text-rose-200 transition-colors" style={{ fontWeight: 400 }}>
+                {prefs.unwindDuration}m
+              </div>
+            </button>
+          </div>
+        </div>
+
       </div>
 
       {/* Settings modal */}
@@ -196,7 +196,7 @@ export function HomeScreen({ prefs, sendCmd }: Props) {
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <label className="text-sm text-orange-200/85" style={{ fontWeight: 500 }}>Wake time</label>
+                  <label className="text-sm text-orange-200/85" style={{ fontWeight: 500 }}>Wake Up</label>
                   <input
                     type="time"
                     value={edit.wakeTime}
@@ -205,11 +205,11 @@ export function HomeScreen({ prefs, sendCmd }: Props) {
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <label className="text-sm text-orange-200/85" style={{ fontWeight: 500 }}>Ritual duration</label>
+                  <label className="text-sm text-orange-200/85" style={{ fontWeight: 500 }}>Ritual</label>
                   <select
                     value={edit.unwindDuration}
                     onChange={(e) => setEdit({ ...edit, unwindDuration: Number(e.target.value) })}
-                    className="w-full px-4 py-3 rounded-xl bg-orange-950/30 border border-orange-800/45 text-white focus:outline-none focus:border-orange-500/70 transition-colors"
+                    className="w-full pl-4 pr-10 py-3 rounded-xl bg-orange-950/30 border border-orange-800/45 text-white focus:outline-none focus:border-orange-500/70 transition-colors"
                   >
                     {DURATIONS.map((d) => (
                       <option key={d} value={d}>{d} minutes</option>

@@ -33,12 +33,18 @@ function fmtCountdown(secs: number): string {
 }
 
 export function ActiveSessionScreen({ prefs, session, sendCmd }: Props) {
-  const [nudgeIdx, setNudgeIdx] = useState(0)
+  const [nudgeIdx, setNudgeIdx] = useState(() => Math.floor(Math.random() * NUDGES.length))
   const [showEnd, setShowEnd] = useState(false)
   const [showDebug, setShowDebug] = useState(false)
 
   useEffect(() => {
-    const t = setInterval(() => setNudgeIdx((i) => (i + 1) % NUDGES.length), 45_000)
+    const t = setInterval(() => {
+      setNudgeIdx(i => {
+        let next = Math.floor(Math.random() * NUDGES.length)
+        while (next === i) next = Math.floor(Math.random() * NUDGES.length)
+        return next
+      })
+    }, 45_000)
     return () => clearInterval(t)
   }, [])
 
@@ -53,9 +59,9 @@ export function ActiveSessionScreen({ prefs, session, sendCmd }: Props) {
         className="absolute inset-0"
         animate={{
           background: [
-            'radial-gradient(circle at 30% 40%, rgba(251,146,60,0.13) 0%, transparent 50%), radial-gradient(circle at 70% 60%, rgba(245,158,11,0.10) 0%, transparent 50%)',
-            'radial-gradient(circle at 70% 60%, rgba(251,146,60,0.13) 0%, transparent 50%), radial-gradient(circle at 30% 40%, rgba(245,158,11,0.10) 0%, transparent 50%)',
-            'radial-gradient(circle at 30% 40%, rgba(251,146,60,0.13) 0%, transparent 50%), radial-gradient(circle at 70% 60%, rgba(245,158,11,0.10) 0%, transparent 50%)',
+            'radial-gradient(circle at 30% 40%, rgba(251,146,60,0.25) 0%, transparent 50%), radial-gradient(circle at 70% 60%, rgba(245,158,11,0.20) 0%, transparent 50%)',
+            'radial-gradient(circle at 70% 60%, rgba(251,146,60,0.25) 0%, transparent 50%), radial-gradient(circle at 30% 40%, rgba(245,158,11,0.20) 0%, transparent 50%)',
+            'radial-gradient(circle at 30% 40%, rgba(251,146,60,0.25) 0%, transparent 50%), radial-gradient(circle at 70% 60%, rgba(245,158,11,0.20) 0%, transparent 50%)',
           ],
         }}
         transition={{ duration: 10, repeat: Infinity, ease: 'linear' }}
@@ -67,9 +73,6 @@ export function ActiveSessionScreen({ prefs, session, sendCmd }: Props) {
           <div className="flex items-center gap-3">
             <UnwindLogo size={20} />
             <span className="text-sm text-orange-300/80" style={{ fontWeight: 400 }}>Unwinding</span>
-            <span className="text-xs px-2 py-0.5 rounded-full bg-orange-950/40 border border-orange-800/30 text-orange-400/80" style={{ fontWeight: 400 }}>
-              Docked
-            </span>
           </div>
           <button
             onClick={() => setShowEnd(true)}
@@ -84,27 +87,24 @@ export function ActiveSessionScreen({ prefs, session, sendCmd }: Props) {
           {/* Breathing orb */}
           <div className="relative w-32 h-32 flex items-center justify-center">
             <motion.div
-              animate={{ scale: [1, 1.25, 1], opacity: [0.2, 0.4, 0.2] }}
+              animate={{ scale: [1, 1.4, 1], opacity: [0.3, 0.6, 0.3] }}
               transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut' }}
-              className="absolute inset-0 rounded-full bg-gradient-to-br from-orange-400/30 to-amber-400/30"
-              style={{ filter: 'blur(28px)' }}
+              className="absolute inset-0 rounded-full bg-gradient-to-br from-orange-400/40 to-amber-400/40"
+              style={{ filter: 'blur(32px)' }}
             />
             <motion.div
-              animate={{ scale: [1, 1.12, 1], rotate: [0, 4, 0] }}
+              animate={{ scale: [1, 1.2, 1], rotate: [0, 8, 0] }}
               transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut' }}
-              className="w-24 h-24 rounded-full bg-gradient-to-br from-orange-500/30 to-amber-500/30 backdrop-blur-sm"
+              className="w-24 h-24 rounded-full bg-gradient-to-br from-orange-500/50 to-amber-500/50 backdrop-blur-sm"
             />
           </div>
 
           {/* Countdown */}
           <div className="text-center">
-            <div className="text-sm tracking-widest uppercase text-orange-300/70 mb-3" style={{ fontWeight: 500 }}>
-              Time remaining
-            </div>
-            <div className="text-5xl text-white tracking-wide tabular-nums" style={{ fontWeight: 300 }}>
+            <div className="text-6xl leading-none text-white tabular-nums" style={{ fontFamily: '"DM Sans", sans-serif', fontWeight: 300, letterSpacing: '-0.02em' }}>
               {fmtCountdown(session.timeRemaining)}
             </div>
-            <div className="text-sm text-orange-300/75 mt-3" style={{ fontWeight: 400 }}>
+            <div className="text-sm text-orange-200/85 mt-3" style={{ fontWeight: 500 }}>
               Bedtime: {fmt12h(prefs.bedtime)}
             </div>
             {session.pickupCount > 0 && (
@@ -188,7 +188,7 @@ export function ActiveSessionScreen({ prefs, session, sendCmd }: Props) {
               onClick={(e) => e.stopPropagation()}
               className="bg-gradient-to-b from-orange-950/60 to-slate-900/98 rounded-2xl p-6 w-full max-w-sm border border-orange-900/40"
             >
-              <h2 className="text-xl text-white mb-2" style={{ fontWeight: 400 }}>End ritual early?</h2>
+              <h2 className="text-xl text-white mb-2" style={{ fontWeight: 500 }}>End ritual early?</h2>
               <p className="text-orange-200/70 text-sm mb-6" style={{ fontWeight: 400 }}>
                 You still have {minutes} minute{minutes !== 1 ? 's' : ''} remaining.
               </p>

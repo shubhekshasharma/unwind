@@ -35,19 +35,11 @@ export function ReminderScreen({ isPulsing, prefs, session, sendCmd }: Props) {
 
       <div className="relative size-full flex flex-col items-center justify-between p-6">
         {/* Top bar */}
-        <div className="w-full flex items-center justify-between">
+        <div className="w-full flex items-center">
           <div className="flex items-center gap-2">
             <UnwindLogo size={20} />
             <span className="text-sm text-orange-300/80" style={{ fontWeight: 400 }}>Unwind</span>
           </div>
-          {!isPulsing && (
-            <button
-              onClick={() => sendCmd({ cmd: 'navigate', screen: 'home' })}
-              className="text-xs text-orange-400/60 hover:text-orange-300 transition-colors px-3 py-1.5 rounded-full bg-orange-950/30 border border-orange-800/20"
-            >
-              Dismiss
-            </button>
-          )}
         </div>
 
         {/* Centre */}
@@ -71,13 +63,13 @@ export function ReminderScreen({ isPulsing, prefs, session, sendCmd }: Props) {
               </motion.div>
 
               <div className="text-center space-y-3 relative">
-                <h1 className="text-4xl text-white" style={{ fontWeight: 400 }}>
+                <h1 className="text-4xl text-white" style={{ fontWeight: 500 }}>
                   Time to unwind
                 </h1>
-                <p className="text-orange-100/80 text-base max-w-xs" style={{ fontWeight: 400 }}>
-                  Dock your phone to begin your {prefs.unwindDuration}-minute ritual
+                <p className="text-orange-100/80 text-lg max-w-xs" style={{ fontWeight: 400 }}>
+                  Dock your phone to begin
                 </p>
-                <p className="text-orange-200/60 text-sm" style={{ fontWeight: 400 }}>
+                <p className="text-sm tracking-widest uppercase text-orange-200/70" style={{ fontWeight: 500 }}>
                   Bedtime: {fmt12h(prefs.bedtime)}
                 </p>
               </div>
@@ -91,11 +83,11 @@ export function ReminderScreen({ isPulsing, prefs, session, sendCmd }: Props) {
                 <Bell className="w-20 h-20 text-orange-400/75" />
               </motion.div>
               <div className="text-center space-y-3">
-                <h1 className="text-2xl text-white" style={{ fontWeight: 400 }}>Get ready to unwind</h1>
-                <p className="text-orange-200/80 text-base max-w-xs" style={{ fontWeight: 400 }}>
-                  Your {prefs.unwindDuration}-minute ritual starts in 5 minutes
+                <h1 className="text-2xl text-white" style={{ fontWeight: 500 }}>Get ready to unwind</h1>
+                <p className="text-orange-200/80 text-lg max-w-xs" style={{ fontWeight: 400 }}>
+                  Your wind-down begins in 5 minutes
                 </p>
-                <p className="text-orange-300/70 text-sm" style={{ fontWeight: 400 }}>
+                <p className="text-sm tracking-widest uppercase text-orange-300/70" style={{ fontWeight: 500 }}>
                   Bedtime: {fmt12h(prefs.bedtime)}
                 </p>
               </div>
@@ -113,7 +105,7 @@ export function ReminderScreen({ isPulsing, prefs, session, sendCmd }: Props) {
                 className="w-full py-4 rounded-2xl text-lg bg-orange-700/80 hover:bg-orange-700 text-orange-50 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                 style={{ fontWeight: 500 }}
               >
-                {session.isPhoneDocked ? 'Start Unwind' : 'Dock your phone to begin'}
+                Start Unwind
               </button>
 
               <button
@@ -121,7 +113,7 @@ export function ReminderScreen({ isPulsing, prefs, session, sendCmd }: Props) {
                 className="w-full py-2.5 text-sm text-orange-400/50 hover:text-orange-300/70 transition-colors"
                 style={{ fontWeight: 400 }}
               >
-                Not tonight
+                Skip tonight
               </button>
             </>
           ) : (
@@ -130,7 +122,7 @@ export function ReminderScreen({ isPulsing, prefs, session, sendCmd }: Props) {
               className="w-full py-3.5 rounded-2xl bg-orange-950/25 border border-orange-800/20 text-orange-300/70 hover:bg-orange-950/40 transition-colors"
               style={{ fontWeight: 400 }}
             >
-              Got it, I'll be ready
+              Dismiss
             </button>
           )}
         </div>

@@ -77,11 +77,11 @@ export function OnboardingScreen({ prefs, sendCmd }: Props) {
               <div className="text-center space-y-6">
                 <UnwindLogo size={88} animate />
                 <div>
-                  <h1 className="text-3xl text-white mb-3" style={{ fontWeight: 400 }}>
+                  <h1 className="text-3xl text-white mb-3" style={{ fontWeight: 500 }}>
                     Welcome to Unwind
                   </h1>
                   <p className="text-orange-200/80 text-base leading-relaxed" style={{ fontWeight: 400 }}>
-                    Create a calming bedtime ritual that helps you put down your phone and drift into restful sleep.
+                    A bedtime ritual that helps you put your phone down and sleep better.
                   </p>
                 </div>
               </div>
@@ -91,11 +91,11 @@ export function OnboardingScreen({ prefs, sendCmd }: Props) {
               <div className="w-full space-y-8">
                 <div className="text-center">
                   <Moon className="w-14 h-14 text-orange-400 mx-auto mb-4 opacity-90" />
-                  <h2 className="text-2xl text-white mb-2" style={{ fontWeight: 400 }}>
-                    Set your sleep schedule
+                  <h2 className="text-2xl text-white mb-2" style={{ fontWeight: 500 }}>
+                    Your Sleep Schedule
                   </h2>
                   <p className="text-orange-200/75 text-base" style={{ fontWeight: 400 }}>
-                    When do you want to sleep and wake up?
+                    When do you want to go to bed and wake up?
                   </p>
                 </div>
                 <div className="space-y-5">
@@ -109,7 +109,7 @@ export function OnboardingScreen({ prefs, sendCmd }: Props) {
                     />
                   </div>
                   <div className="space-y-2">
-                    <label className="text-sm text-orange-200/80" style={{ fontWeight: 500 }}>Wake time</label>
+                    <label className="text-sm text-orange-200/80" style={{ fontWeight: 500 }}>Wake up</label>
                     <input
                       type="time"
                       value={wakeTime}
@@ -125,11 +125,11 @@ export function OnboardingScreen({ prefs, sendCmd }: Props) {
               <div className="w-full space-y-7">
                 <div className="text-center">
                   <Clock className="w-14 h-14 text-orange-400 mx-auto mb-4 opacity-90" />
-                  <h2 className="text-2xl text-white mb-2" style={{ fontWeight: 400 }}>
-                    Ritual duration
+                  <h2 className="text-2xl text-white mb-2" style={{ fontWeight: 500 }}>
+                    Unwind Ritual
                   </h2>
                   <p className="text-orange-200/75 text-base" style={{ fontWeight: 400 }}>
-                    How long should your wind-down ritual be?
+                    How long do you want to unwind before sleep?
                   </p>
                 </div>
                 <div className="space-y-3">
@@ -180,7 +180,7 @@ export function OnboardingScreen({ prefs, sendCmd }: Props) {
               className="w-full py-3.5 rounded-2xl bg-orange-600 hover:bg-orange-500 text-white transition-colors"
               style={{ fontWeight: 500 }}
             >
-              Start Unwinding
+              Create my routine
             </button>
           )}
           {step > 0 && (

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
-import { ArrowLeft, Moon, RotateCcw } from 'lucide-react'
+import { X, Moon } from 'lucide-react'
 import type { Prefs, SendCmd } from '../App'
 
 type Props = { prefs: Prefs; sendCmd: SendCmd }
@@ -36,116 +36,115 @@ export function StatsScreen({ sendCmd }: Props) {
   useEffect(() => {
     fetch('/api/sessions')
       .then((r) => r.json())
-      .then((data) => {
-        setSessions(data)
-        setLoading(false)
-      })
+      .then((data) => { setSessions(data); setLoading(false) })
       .catch(() => setLoading(false))
   }, [])
 
-  const avgDuration = sessions.length
-    ? sessions.reduce((s, r) => s + (r.duration_seconds || 0), 0) / sessions.length
+  const avgPickups = sessions.length
+    ? Math.round(sessions.reduce((s, r) => s + (r.pickup_count || 0), 0) / sessions.length)
     : 0
 
   return (
     <div className="size-full relative overflow-hidden bg-slate-950">
       <motion.div
-        className="absolute inset-0"
+        className="absolute inset-0 pointer-events-none"
         animate={{
           background: [
-            'radial-gradient(circle at 50% 10%, rgba(251,146,60,0.07) 0%, transparent 50%)',
-            'radial-gradient(circle at 50% 10%, rgba(251,146,60,0.04) 0%, transparent 50%)',
-            'radial-gradient(circle at 50% 10%, rgba(251,146,60,0.07) 0%, transparent 50%)',
+            'radial-gradient(circle at 50% 20%, rgba(251,146,60,0.06) 0%, transparent 60%)',
+            'radial-gradient(circle at 50% 25%, rgba(245,158,11,0.08) 0%, transparent 60%)',
+            'radial-gradient(circle at 50% 20%, rgba(251,146,60,0.06) 0%, transparent 60%)',
           ],
         }}
-        transition={{ duration: 8, repeat: Infinity }}
+        transition={{ duration: 12, repeat: Infinity }}
       />
 
       <div className="relative size-full flex flex-col p-6">
         {/* Header */}
-        <div className="flex items-center justify-between mb-5">
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => sendCmd({ cmd: 'navigate', screen: 'home' })}
-              className="p-2 rounded-full hover:bg-orange-900/20 transition-colors"
-            >
-              <ArrowLeft className="w-5 h-5 text-orange-400/80" />
-            </button>
-            <h1 className="text-xl text-white" style={{ fontWeight: 400 }}>Sleep history</h1>
+        <div className="flex items-start justify-between mb-8">
+          <div>
+            <h1 className="text-3xl text-white" style={{ fontWeight: 500 }}>History</h1>
+            {sessions.length > 0 && (
+              <div className="flex items-center gap-3 mt-3">
+                <span className="text-sm text-orange-300/60" style={{ fontWeight: 400 }}>
+                  {sessions.length} session{sessions.length !== 1 ? 's' : ''}
+                </span>
+                <div className="w-1 h-1 rounded-full bg-orange-400/30" />
+                <span className="text-sm text-orange-300/60" style={{ fontWeight: 400 }}>
+                  {avgPickups} avg pickup{avgPickups !== 1 ? 's' : ''}
+                </span>
+              </div>
+            )}
           </div>
           <button
-            onClick={() => setShowResetConfirm(true)}
-            className="flex items-center gap-1.5 text-sm text-red-300/80 hover:text-red-200 transition-colors px-3 py-1.5 rounded-lg border border-red-800/50 bg-red-950/30 hover:bg-red-950/50"
-            style={{ fontWeight: 500 }}
+            onClick={() => sendCmd({ cmd: 'navigate', screen: 'home' })}
+            className="p-2.5 rounded-full hover:bg-orange-900/20 transition-colors"
           >
-            <RotateCcw className="w-3.5 h-3.5" />
-            Reset
+            <X className="w-5 h-5 text-orange-400/80" />
           </button>
         </div>
 
-        {/* Summary row */}
-        {sessions.length > 0 && (
-          <div className="grid grid-cols-2 gap-3 mb-4">
-            <div className="bg-slate-900/60 border border-slate-700/40 rounded-xl p-3.5">
-              <div className="text-xs uppercase tracking-wider text-orange-400/70 mb-1" style={{ fontWeight: 500 }}>Sessions</div>
-              <div className="text-2xl text-white" style={{ fontWeight: 400 }}>{sessions.length}</div>
-            </div>
-            <div className="bg-slate-900/60 border border-slate-700/40 rounded-xl p-3.5">
-              <div className="text-xs uppercase tracking-wider text-amber-400/70 mb-1" style={{ fontWeight: 500 }}>Avg duration</div>
-              <div className="text-2xl text-white" style={{ fontWeight: 400 }}>{fmtDuration(avgDuration)}</div>
-            </div>
-          </div>
-        )}
-
         {/* Session list */}
-        <div className="flex-1 overflow-y-auto space-y-2 pb-2">
+        <div className="flex-1 overflow-y-auto space-y-5 pb-4">
           {loading && (
-            <div className="text-center text-orange-400/65 pt-12 text-sm">Loading…</div>
+            <div className="text-center text-orange-400/50 pt-16 text-sm">Loading…</div>
           )}
 
           {!loading && sessions.length === 0 && (
-            <div className="flex flex-col items-center justify-center pt-12 gap-4">
-              <Moon className="w-12 h-12 text-orange-400/35" />
-              <p className="text-orange-200/65 text-sm text-center" style={{ fontWeight: 400 }}>
-                No completed sessions yet.{'\n'}Complete your first Unwind ritual to see stats here.
+            <div className="flex flex-col items-center justify-center pt-16 gap-4">
+              <Moon className="w-10 h-10 text-orange-400/30" />
+              <p className="text-orange-200/50 text-sm text-center" style={{ fontWeight: 400 }}>
+                No sessions yet.{'\n'}Complete your first Unwind to see history here.
               </p>
             </div>
           )}
 
           {sessions.map((s, i) => {
             const pickups = s.pickup_count || 0
-            const pickupColor = pickups === 0 ? 'text-green-400' : pickups > 2 ? 'text-red-400' : 'text-orange-400'
-
             return (
               <motion.div
                 key={s.id}
-                initial={{ opacity: 0, y: 10 }}
+                initial={{ opacity: 0, y: 16 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.04 }}
-                className="bg-slate-900/55 border border-slate-700/35 rounded-xl p-3.5"
+                transition={{ delay: i * 0.05 }}
+                className="border-l-2 border-orange-800/25 pl-5 py-1"
               >
-                <div className="flex items-center justify-between mb-1.5">
-                  <span className="text-xs text-slate-400/80" style={{ fontWeight: 400 }}>
+                <div className="flex items-baseline justify-between mb-2">
+                  <span className="text-base text-orange-200/70" style={{ fontWeight: 400 }}>
                     {s.created_at || '—'}
                   </span>
-                  <span className="text-base text-white" style={{ fontWeight: 600 }}>
+                  <span className="text-sm text-orange-300/60" style={{ fontWeight: 400 }}>
                     {fmtDuration(s.duration_seconds)}
                   </span>
                 </div>
-                <div className="flex items-center justify-between text-sm">
-                  <span className={pickupColor} style={{ fontWeight: 400 }}>
-                    {pickups === 0 ? 'No pickups ✓' : `${pickups} pickup${pickups !== 1 ? 's' : ''}`}
-                  </span>
+                <div className="flex items-center gap-4 text-sm">
                   {s.alarm_time && (
-                    <span className="text-slate-400/80" style={{ fontWeight: 400 }}>
-                      Bedtime {fmt12h(s.alarm_time)}
+                    <span className="text-slate-500" style={{ fontWeight: 400 }}>
+                      {fmt12h(s.alarm_time)}
                     </span>
                   )}
+                  {s.alarm_time && <div className="w-1 h-1 rounded-full bg-slate-700" />}
+                  <span
+                    className={pickups === 0 ? 'text-green-400/75' : 'text-slate-500'}
+                    style={{ fontWeight: 400 }}
+                  >
+                    {pickups === 0 ? 'No pickups' : `${pickups} pickup${pickups !== 1 ? 's' : ''}`}
+                  </span>
                 </div>
               </motion.div>
             )
           })}
         </div>
+
+        {/* Reset link */}
+        {sessions.length > 0 && (
+          <button
+            onClick={() => setShowResetConfirm(true)}
+            className="mt-4 text-xs text-red-400/40 hover:text-red-400/70 transition-colors text-center"
+            style={{ fontWeight: 400 }}
+          >
+            Reset all data
+          </button>
+        )}
       </div>
 
       {/* Reset confirmation modal */}

@@ -67,15 +67,15 @@ export function PausedScreen({ prefs, session, sendCmd }: Props) {
 
           {/* Headline */}
           <div className="text-center">
-            <h1 className="text-3xl text-white mb-1" style={{ fontWeight: 400 }}>Scrolling?</h1>
-            <p className="text-rose-200/75 text-base" style={{ fontWeight: 400 }}>Every minute counts</p>
+            <h1 className="text-3xl text-white mb-1" style={{ fontWeight: 500 }}>Taking a quick break?</h1>
+            <p className="text-rose-200/75 text-base" style={{ fontWeight: 400 }}>Let's keep going</p>
           </div>
 
           {/* Dock warning callout — non-interactive */}
           <div className="w-full rounded-2xl bg-rose-950/35 border border-rose-700/30 px-5 py-4 flex items-center gap-3">
             <Phone className="w-5 h-5 text-rose-400/75 shrink-0" />
             <span className="text-sm text-rose-100/80 leading-snug" style={{ fontWeight: 400 }}>
-              Place your phone back on the dock to resume
+              Place phone back to continue
             </span>
           </div>
 
@@ -95,7 +95,7 @@ export function PausedScreen({ prefs, session, sendCmd }: Props) {
               {fmtWindow(remainingMins)}
             </div>
             <div className="text-xs text-rose-300/50 mt-1" style={{ fontWeight: 400 }}>
-              available if you sleep now
+              of {fmtWindow(totalMins)} of sleep if you return now
             </div>
           </div>
         </div>
@@ -106,7 +106,7 @@ export function PausedScreen({ prefs, session, sendCmd }: Props) {
           className="w-full max-w-xs py-3 text-rose-300/50 hover:text-rose-200/80 transition-colors text-sm"
           style={{ fontWeight: 400 }}
         >
-          End session &amp; sleep
+          End session early
         </button>
       </div>
 
